@@ -81,13 +81,14 @@ if args.xbt:
 	fig = plt.figure(1, figsize=(1, 3), facecolor='w', edgecolor='w')
 	ax1 = fig.add_subplot(111)
 	#p1 = ax1.plot(xbtdata['(C)'],xbtdata['Depth'],'r')
-	p1 = ax1.scatter(xbtdata['(C)'],xbtdata['Depth'],5,marker='.', edgecolors='none', c=xbtdata['(C)'], 
+	p1 = ax1.scatter(xbtdata['(C)'],xbtdata['Depth'],8,marker='.', edgecolors='none', c=xbtdata['(C)'], 
         norm=MidpointNormalize(midpoint=0.),
         vmin=args.paramspan[0], vmax=args.paramspan[1], 
         cmap='seismic')
 
-	p1 = ax1.plot(np.zeros_like(xbtdata['Depth']),xbtdata['Depth'],'grey',linewidth=.1)
+	p1 = ax1.plot(np.zeros_like(xbtdata['Depth']),xbtdata['Depth'],'grey',linewidth=.15)
 	ax1.set_yticks(np.arange(0.,args.maxdepth + 25.,10.))
+
 	if args.maxdepth:
 		ax1.set_ylim([0,args.maxdepth])
 
@@ -99,8 +100,7 @@ if args.xbt:
 	fmt=mpl.ticker.ScalarFormatter(useOffset=False)
 	fmt.set_scientific(False)
 	ax1.xaxis.set_major_formatter(fmt)
-	ax1.tick_params(axis='both', which='major')
-	ax1.xaxis.set_ticklabels([])
+	ax1.tick_params(axis='both', which='major', bottom='off', top='off',labelbottom='off')
 	ax1.yaxis.set_ticklabels([])
 	plt.tight_layout()
 	plt.savefig(args.filepath.split('.')[0] + '.png', transparent=True, dpi = (150))
