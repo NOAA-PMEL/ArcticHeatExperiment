@@ -65,8 +65,12 @@ parser.add_argument('-axctd','--axctd', action="store_true",
 	help='work with axctd data')
 parser.add_argument('-xbt','--xbt', action="store_true",
 	help='work with xbt data')
-parser.add_argument('--maxdepth', type=float, help="known bathymetric depth at location")
-parser.add_argument('--paramspan', nargs='+', type=float, help="max,min of parameter")
+parser.add_argument('--save_excel', action="store_true", 
+	help="save profile to excel - excel filename")
+parser.add_argument('--maxdepth', type=float, 
+	help="known bathymetric depth at location")
+parser.add_argument('--paramspan', nargs='+', type=float, 
+	help="max,min of parameter")
 
 args = parser.parse_args()
 
@@ -105,3 +109,7 @@ if args.xbt:
 	plt.tight_layout()
 	plt.savefig(args.filepath.split('.')[0] + '.png', transparent=True, dpi = (150))
 	plt.close()
+
+	if args.save_excel:
+		writer = pd.ExcelWriter(args.filepath.split('.')[0] + '.xlsx')
+		xbtdata.to_excel(writer,sheet_name=args.filepath.split('/')[-1])
