@@ -1,10 +1,18 @@
 #!/usr/bin/env python
 
 """
-ArcticHeatCTDsparklines.py
 
-Create miniature sparkline CTD plots for XBT/AXCTD data
+ Background:
+ --------
+ ArcticHeatCTDsparklines.py
+ 
+ Purpose:
+ --------
+ Create miniature sparkline CTD plots for XBT/AXCTD data
 
+ History:
+ --------
+ 2016-09-27 - add AXCTD code
 """
 
 #System Stack
@@ -61,10 +69,10 @@ class MidpointNormalize(colors.Normalize):
 parser = argparse.ArgumentParser(description='ArcticHeat ctd datafile parser ')
 parser.add_argument('filepath', metavar='filepath', type=str,
                help='full path to file')
-parser.add_argument('-axctd','--axctd', action="store_true",
-	help='work with axctd data')
 parser.add_argument('-xbt','--xbt', action="store_true",
 	help='work with xbt data')
+parser.add_argument('-axctd','--axctd', action="store_true",
+	help='work with axctd data')
 parser.add_argument('--save_excel', action="store_true", 
 	help="save profile to excel - excel filename")
 parser.add_argument('--maxdepth', type=float, 
@@ -74,8 +82,58 @@ parser.add_argument('--paramspan', nargs='+', type=float,
 
 args = parser.parse_args()
 
+#TODO: Duplicate code in xbt/axctd data can be combined to a more simpler routine
+
+#######
+# axctd
+#
+if args.axctd:
+	axctddata = pd.read_csv(args.filepath, delim_whitespace=True, skiprows=4, na_values='*****')
+
+	if args.maxdepth:
+		figscale = args.maxdepth / 15. #makes most of the chukchi a 1x3 inch image
+	else:
+		figscale = 3.
+
+	fig = plt.figure(1, figsize=(1, 3), facecolor='w', edgecolor='w')
+	ax1 = fig.add_subplot(111)
+
+	p1 = ax1.scatter(axctddata['Temp'],axctddata['Depth'],8,marker='.', edgecolors='none', c=axctddata['Temp'], 
+        norm=MidpointNormalize(midpoint=0.),
+        vmin=args.paramspan[0], vmax=args.paramspan[1], 
+        cmap='seismic')
+
+	p1 = ax1.plot(np.zeros_like(axctddata['Depth']),axctddata['Depth'],'grey',linewidth=.15)
+	ax1.set_yticks(np.arange(0.,args.maxdepth + 25.,10.))
+
+	if args.maxdepth:
+		ax1.set_ylim([0,args.maxdepth])
+
+	if args.paramspan:
+		ax1.set_xlim([args.paramspan[0],args.paramspan[1]])
+
+	ax1.invert_yaxis()
+
+	fmt=mpl.ticker.ScalarFormatter(useOffset=False)
+	fmt.set_scientific(False)
+	ax1.xaxis.set_major_formatter(fmt)
+	ax1.tick_params(axis='both', which='major', bottom='off', top='off',labelbottom='off')
+	ax1.yaxis.set_ticklabels([])
+	plt.tight_layout()
+	plt.savefig(args.filepath.split('.')[0] + '.png', transparent=True, dpi = (150))
+	plt.close()
+
+	if args.save_excel:
+		writer = pd.ExcelWriter(args.filepath.split('.')[0] + '.xlsx')
+		axctddata.to_excel(writer,sheet_name=args.filepath.split('/')[-1].split('_')[0])
+
+
+
+#####
+# xbt
+#
 if args.xbt:
-	xbtdata = pd.read_csv(args.filepath, delim_whitespace=True, skiprows=4, na_values='******')
+	xbtdata = pd.read_csv(args.filepath, delim_whitespace=True, skiprows=3, na_values='******')
 
 	if args.maxdepth:
 		figscale = args.maxdepth / 15. #makes most of the chukchi a 1x3 inch image
