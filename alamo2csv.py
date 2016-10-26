@@ -75,6 +75,19 @@ def etopo5_data():
     
     return(topoin, lats, lons)
 
+def IBCAO_data():
+    """ read in IBCAO topography/bathymetry. """
+    file_in = '/Volumes/WDC_internal/Users/bell/in_and_outbox/MapGrids/ARDEMv2.0.nc'
+    IBCAOtopodata = Dataset(file_in)
+    
+    topoin = IBCAOtopodata.variables['z'][:]
+    lons = IBCAOtopodata.variables['lon'][:] #degrees east
+    lats = IBCAOtopodata.variables['lat'][:]
+    IBCAOtopodata.close()
+    
+ 
+    return(topoin, lats, lons)
+
 def find_nearest(a, a0):
     "Element in nd array `a` closest to the scalar value `a0`"
     idx = np.abs(a - a0).argmin()
@@ -83,18 +96,43 @@ def find_nearest(a, a0):
 """---------------------------------- Main --------------------------------------------"""
 
 parser = argparse.ArgumentParser(description='Convert .nc to .csv screen output')
-parser.add_argument('infile', metavar='infile', type=str, help='input file path')
+#parser.add_argument('infile', metavar='infile', type=str, help='input file path')
 parser.add_argument("-csv_out","--csv_out", action="store_true",
         help='output non-epic formatted netcdf as csv')
 args = parser.parse_args()
 
-
+path = '/Volumes/WDC_internal/Users/bell/in_and_outbox/2016/wood/ArcticHeat/AlamoFloats/'
+infile = ['arctic_heat_alamo_profiles_9058_9f75_d5e5_f5f9.nc',
+		  'arctic_heat_alamo_profiles_9076_6c2c_4984_d7e4.nc',
+		  'arctic_heat_alamo_profiles_9085_a189_de6c_cb81.nc',
+		  'arctic_heat_alamo_profiles_9115_bb97_cc7e_a9c0.nc',
+		  'arctic_heat_alamo_profiles_9116_5d1b_e525_f403.nc']
 ###nc readin/out
-ncfile = args.infile
-df = EcoFOCI_netCDF(ncfile)
+df = EcoFOCI_netCDF(path+infile[0])
 global_atts = df.get_global_atts()
 vars_dic = df.get_vars()
-data = df.ncreadfile_dic()
+data0 = df.ncreadfile_dic()
+
+df = EcoFOCI_netCDF(path+infile[1])
+global_atts = df.get_global_atts()
+vars_dic = df.get_vars()
+data1 = df.ncreadfile_dic()
+
+df = EcoFOCI_netCDF(path+infile[2])
+global_atts = df.get_global_atts()
+vars_dic = df.get_vars()
+data2 = df.ncreadfile_dic()
+
+df = EcoFOCI_netCDF(path+infile[3])
+global_atts = df.get_global_atts()
+vars_dic = df.get_vars()
+data3 = df.ncreadfile_dic()
+
+df = EcoFOCI_netCDF(path+infile[4])
+global_atts = df.get_global_atts()
+vars_dic = df.get_vars()
+data4 = df.ncreadfile_dic()
+"""---"""
 
 if args.csv_out:
 
@@ -111,23 +149,30 @@ if args.csv_out:
 				line = line + ', ' + str(data[k][i])
 		print line
 
-dtime = num2date(data['time'],'seconds since 1970-01-01')
-doy = [x.timetuple().tm_yday for x in dtime]
+dtime = num2date(data0['time'],'seconds since 1970-01-01')
+doy0 = [x.timetuple().tm_yday for x in dtime]
+dtime = num2date(data1['time'],'seconds since 1970-01-01')
+doy1 = [x.timetuple().tm_yday for x in dtime]
+dtime = num2date(data2['time'],'seconds since 1970-01-01')
+doy2 = [x.timetuple().tm_yday for x in dtime]
+dtime = num2date(data3['time'],'seconds since 1970-01-01')
+doy3 = [x.timetuple().tm_yday for x in dtime]
+dtime = num2date(data4['time'],'seconds since 1970-01-01')
+doy4 = [x.timetuple().tm_yday for x in dtime]
 
 #### plot
 etopo_levels=[-1000, -100, -50, -25, ]  #chuckchi
 
-#(topoin, lats, lons) = etopo1_subset()
-#elons, elats = np.meshgrid(lons, lats)
-(topoin, elats, elons) = etopo5_data()
+(topoin, elats, elons) = etopo1_subset()
+#(topoin, elats, elons) = etopo5_data()
 
 
 
 #determine regional bounding
-y1 = np.floor(data['latitude'].min()-5)
-y2 = np.ceil(data['latitude'].max()+5)
-x1 = np.ceil((data['longitude'].min()-10))
-x2 = np.floor((data['longitude'].max()+10))
+y1 = np.floor(data0['latitude'].min()-2.5)
+y2 = np.ceil(data0['latitude'].max()+2.5)
+x1 = np.ceil((data0['longitude'].min()-5))
+x2 = np.floor((data0['longitude'].max()+5))
 
 fig = plt.figure()
 ax = plt.subplot(111)
@@ -138,26 +183,40 @@ m = Basemap(resolution='i',projection='merc', llcrnrlat=y1, \
 
 elons, elats = np.meshgrid(elons, elats)
 ex, ey = m(elons, elats)
-x,y = m(data['longitude'],data['latitude'])
+xd0,yd0 = m(data0['longitude'],data0['latitude'])
+xd1,yd1 = m(data1['longitude'],data1['latitude'])
+xd2,yd2 = m(data2['longitude'],data2['latitude'])
+xd3,yd3 = m(data3['longitude'],data3['latitude'])
+xd4,yd4 = m(data4['longitude'],data4['latitude'])
 
 #CS = m.imshow(topoin, cmap='Greys_r') #
 CS_l = m.contour(ex,ey,topoin, levels=etopo_levels, linestyle='--', linewidths=0.2, colors='black', alpha=.75) 
 CS = m.contourf(ex,ey,topoin, levels=etopo_levels, colors=('#737373','#969696','#bdbdbd','#d9d9d9','#f0f0f0'), extend='both', alpha=.75) 
 plt.clabel(CS_l, inline=1, fontsize=8, fmt='%1.0f')
 
-m.scatter(x,y,20,marker='.', edgecolors='none', c=doy, vmin=0, vmax=365, cmap='viridis')
+m.scatter(xd0,yd0,40,marker='.', edgecolors='none', c=doy0, vmin=120, vmax=300, cmap='viridis')
+m.scatter(xd1,yd1,40,marker='.', edgecolors='none', c=doy1, vmin=120, vmax=300, cmap='viridis')
+m.scatter(xd2,yd2,40,marker='.', edgecolors='none', c=doy2, vmin=120, vmax=300, cmap='viridis')
+m.scatter(xd3,yd3,40,marker='.', edgecolors='none', c=doy3, vmin=120, vmax=300, cmap='viridis')
+m.scatter(xd4,yd4,40,marker='.', edgecolors='none', c=doy4, vmin=120, vmax=300, cmap='viridis')
 c = plt.colorbar()
 c.set_label("Julian Day")
 
+m.plot(xd0[0],yd0[0], '+', markersize=10, color='k')
+m.plot(xd1[0],yd1[0], '+', markersize=10, color='k')
+m.plot(xd2[0],yd2[0], '+', markersize=10, color='k')
+m.plot(xd3[0],yd3[0], '+', markersize=10, color='k')
+m.plot(xd4[0],yd4[0], '+', markersize=10, color='k')
+
 #m.drawcountries(linewidth=0.5)
 m.drawcoastlines(linewidth=0.5)
-m.drawparallels(np.arange(y1,y2,2.),labels=[1,0,0,0],color='black',dashes=[1,1],labelstyle='+/-',linewidth=0.2) # draw parallels
-m.drawmeridians(np.arange(x1-20,x2,4.),labels=[0,0,0,1],color='black',dashes=[1,1],labelstyle='+/-',linewidth=0.2) # draw meridians
+m.drawparallels(np.arange(y1-10,y2+10,2.),labels=[1,0,0,0],color='black',dashes=[1,1],labelstyle='+/-',linewidth=0.2) # draw parallels
+m.drawmeridians(np.arange(x1-10,x2+10,4.),labels=[0,0,0,1],color='black',dashes=[1,1],labelstyle='+/-',linewidth=0.2) # draw meridians
 m.fillcontinents(color='white')
 
 #
 
 DefaultSize = fig.get_size_inches()
 fig.set_size_inches( (DefaultSize[0]*1.5, DefaultSize[1]*1.5) )
-plt.savefig('images/ArcticHeat_Alamo.png', bbox_inches='tight', dpi=300)
+plt.savefig('images/ArcticHeat_Alamo_etopo1.png', bbox_inches='tight', dpi=300)
 plt.close()
