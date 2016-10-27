@@ -149,7 +149,7 @@ if args.csv_out:
 				line = line + ', ' + str(data[k][i])
 		print line
 
-doy_plt = False
+doy_plt = True
 if doy_plt:
     dtime = num2date(data0['time'],'seconds since 1970-01-01')
     doy0 = [x.timetuple().tm_yday for x in dtime]
@@ -190,7 +190,7 @@ if sfc_tmp_plt:
         lat_data4 = lat_data4 + [max(data4['latitude'][data4['CYCLE_NUMBER'] == ind])]
         lon_data4 = lon_data4 + [max(data4['longitude'][data4['CYCLE_NUMBER'] == ind])]
 
-btm_tmp_plt = True
+btm_tmp_plt = False
 if btm_tmp_plt:
     temp_data0,lat_data0, lon_data0 = [],[],[]
     for ind in list(set(data0['CYCLE_NUMBER'])):
@@ -218,6 +218,11 @@ if btm_tmp_plt:
         lat_data4 = lat_data4 + [min(data4['latitude'][data4['CYCLE_NUMBER'] == ind])]
         lon_data4 = lon_data4 + [min(data4['longitude'][data4['CYCLE_NUMBER'] == ind])]
 
+plot_moorings = True
+if plot_moorings:
+    #2015
+    mlat = [71.23013333,72.46685,71.04641667,71.23075,70.8385,71.04785,71.23048333,70.83565,71.24101667]
+    mlon = -1.*np.array([164.2206167,156.5496167,160.5148667,164.2158833,163.10535,160.51155,164.21015,163.12385,164.30135])
 #### plot
 etopo_levels=[-1000, -100, -50, -25, ]  #chuckchi
 
@@ -259,6 +264,8 @@ if btm_tmp_plt:
     xd2,yd2 = m(lon_data2,lat_data2)
     xd3,yd3 = m(lon_data3,lat_data3)
     xd4,yd4 = m(lon_data4,lat_data4)
+if plot_moorings:
+    mx, my = m(mlon, mlat)
 
 #CS = m.imshow(topoin, cmap='Greys_r') #
 CS_l = m.contour(ex,ey,topoin, levels=etopo_levels, linestyle='--', linewidths=0.2, colors='black', alpha=.75) 
@@ -266,27 +273,27 @@ CS = m.contourf(ex,ey,topoin, levels=etopo_levels, colors=('#737373','#969696','
 plt.clabel(CS_l, inline=1, fontsize=8, fmt='%1.0f')
 
 if doy_plt:
-    m.scatter(xd0,yd0,40,marker='.', edgecolors='none', c=doy0, vmin=120, vmax=300, cmap='viridis')
-    m.scatter(xd1,yd1,40,marker='.', edgecolors='none', c=doy1, vmin=120, vmax=300, cmap='viridis')
-    m.scatter(xd2,yd2,40,marker='.', edgecolors='none', c=doy2, vmin=120, vmax=300, cmap='viridis')
-    m.scatter(xd3,yd3,40,marker='.', edgecolors='none', c=doy3, vmin=120, vmax=300, cmap='viridis')
-    m.scatter(xd4,yd4,40,marker='.', edgecolors='none', c=doy4, vmin=120, vmax=300, cmap='viridis')
+    m.scatter(xd0,yd0,100,marker='.', edgecolors='none', c=doy0, vmin=120, vmax=300, cmap='viridis')
+    m.scatter(xd1,yd1,100,marker='.', edgecolors='none', c=doy1, vmin=120, vmax=300, cmap='viridis')
+    m.scatter(xd2,yd2,100,marker='.', edgecolors='none', c=doy2, vmin=120, vmax=300, cmap='viridis')
+    m.scatter(xd3,yd3,100,marker='.', edgecolors='none', c=doy3, vmin=120, vmax=300, cmap='viridis')
+    m.scatter(xd4,yd4,100,marker='.', edgecolors='none', c=doy4, vmin=120, vmax=300, cmap='viridis')
     c = plt.colorbar()
-    c.set_label("Julian Day")
+    c.set_label("DOY")
 if sfc_tmp_plt:
-    m.scatter(xd0,yd0,40,marker='.', edgecolors='none', c=temp_data0, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
-    m.scatter(xd1,yd1,40,marker='.', edgecolors='none', c=temp_data1, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
-    m.scatter(xd2,yd2,40,marker='.', edgecolors='none', c=temp_data2, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
-    m.scatter(xd3,yd3,40,marker='.', edgecolors='none', c=temp_data3, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
-    m.scatter(xd4,yd4,40,marker='.', edgecolors='none', c=temp_data4, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd0,yd0,100,marker='.', edgecolors='none', c=temp_data0, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd1,yd1,100,marker='.', edgecolors='none', c=temp_data1, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd2,yd2,100,marker='.', edgecolors='none', c=temp_data2, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd3,yd3,100,marker='.', edgecolors='none', c=temp_data3, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd4,yd4,100,marker='.', edgecolors='none', c=temp_data4, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
     c = plt.colorbar()
     c.set_label("~SFC Temperature")
 if btm_tmp_plt:
-    m.scatter(xd0,yd0,40,marker='.', edgecolors='none', c=temp_data0, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
-    m.scatter(xd1,yd1,40,marker='.', edgecolors='none', c=temp_data1, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
-    m.scatter(xd2,yd2,40,marker='.', edgecolors='none', c=temp_data2, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
-    m.scatter(xd3,yd3,40,marker='.', edgecolors='none', c=temp_data3, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
-    m.scatter(xd4,yd4,40,marker='.', edgecolors='none', c=temp_data4, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd0,yd0,100,marker='.', edgecolors='none', c=temp_data0, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd1,yd1,100,marker='.', edgecolors='none', c=temp_data1, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd2,yd2,100,marker='.', edgecolors='none', c=temp_data2, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd3,yd3,100,marker='.', edgecolors='none', c=temp_data3, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd4,yd4,100,marker='.', edgecolors='none', c=temp_data4, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
     c = plt.colorbar()
     c.set_label("~BTM Temperature")
 
@@ -296,6 +303,9 @@ m.plot(xd1[0],yd1[0], '+', markersize=10, color='k')
 m.plot(xd2[0],yd2[0], '+', markersize=10, color='k')
 m.plot(xd3[0],yd3[0], '+', markersize=10, color='k')
 m.plot(xd4[0],yd4[0], '+', markersize=10, color='k')
+
+if plot_moorings:
+    m.plot(mx,my,'o', markersize=8, markerfacecolor='None', color='k',markeredgewidth=2)
 
 #m.drawcountries(linewidth=0.5)
 m.drawcoastlines(linewidth=0.5)
@@ -307,5 +317,5 @@ m.fillcontinents(color='white')
 
 DefaultSize = fig.get_size_inches()
 fig.set_size_inches( (DefaultSize[0]*1.5, DefaultSize[1]*1.5) )
-plt.savefig('images/ArcticHeat_Alamo_etopo1_temp_btm.png', bbox_inches='tight', dpi=300)
+plt.savefig('images/ArcticHeat_Alamo_etopo1_temp_doy.png', bbox_inches='tight', dpi=300)
 plt.close()
