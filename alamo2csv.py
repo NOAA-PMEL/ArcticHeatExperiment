@@ -288,7 +288,7 @@ if btm_tmp_plt:
     m.scatter(xd3,yd3,40,marker='.', edgecolors='none', c=temp_data3, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
     m.scatter(xd4,yd4,40,marker='.', edgecolors='none', c=temp_data4, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
     c = plt.colorbar()
-    c.set_label("~SFC Temperature")
+    c.set_label("~BTM Temperature")
 
 
 m.plot(xd0[0],yd0[0], '+', markersize=10, color='k')
