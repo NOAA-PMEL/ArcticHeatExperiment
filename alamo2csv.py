@@ -32,9 +32,9 @@ mpl.use('Agg')
 from mpl_toolkits.basemap import Basemap, shiftgrid
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import cmocean
 
 #User Stack
-from calc import EPIC2Datetime
 from io_utils.EcoFOCI_netCDF_read import EcoFOCI_netCDF
 
 __author__   = 'Shaun Bell'
@@ -49,7 +49,7 @@ __keywords__ = 'netCDF','meta','header', 'csv'
 def etopo1_subset(file='etopo1.nc', region=None):
     """ read in ardemV2 topography/bathymetry. """
     
-    file='/Volumes/WDC_internal/Users/bell/in_and_outbox/MapGrids/etopo_subsets/etopo1_chukchi.nc'
+    file='/Users/bell/in_and_outbox/MapGrids/etopo_subsets/etopo1_chukchi.nc'
     bathydata = Dataset(file)
     
     topoin = bathydata.variables['Band1'][:]
@@ -101,7 +101,7 @@ parser.add_argument("-csv_out","--csv_out", action="store_true",
         help='output non-epic formatted netcdf as csv')
 args = parser.parse_args()
 
-path = '/Volumes/WDC_internal/Users/bell/in_and_outbox/2016/wood/ArcticHeat/AlamoFloats/'
+path = '/Users/bell/in_and_outbox/2016/wood/ArcticHeat/AlamoFloats/'
 infile = ['arctic_heat_alamo_profiles_9058_9f75_d5e5_f5f9.nc',
 		  'arctic_heat_alamo_profiles_9076_6c2c_4984_d7e4.nc',
 		  'arctic_heat_alamo_profiles_9085_a189_de6c_cb81.nc',
@@ -149,16 +149,74 @@ if args.csv_out:
 				line = line + ', ' + str(data[k][i])
 		print line
 
-dtime = num2date(data0['time'],'seconds since 1970-01-01')
-doy0 = [x.timetuple().tm_yday for x in dtime]
-dtime = num2date(data1['time'],'seconds since 1970-01-01')
-doy1 = [x.timetuple().tm_yday for x in dtime]
-dtime = num2date(data2['time'],'seconds since 1970-01-01')
-doy2 = [x.timetuple().tm_yday for x in dtime]
-dtime = num2date(data3['time'],'seconds since 1970-01-01')
-doy3 = [x.timetuple().tm_yday for x in dtime]
-dtime = num2date(data4['time'],'seconds since 1970-01-01')
-doy4 = [x.timetuple().tm_yday for x in dtime]
+doy_plt = False
+if doy_plt:
+    dtime = num2date(data0['time'],'seconds since 1970-01-01')
+    doy0 = [x.timetuple().tm_yday for x in dtime]
+    dtime = num2date(data1['time'],'seconds since 1970-01-01')
+    doy1 = [x.timetuple().tm_yday for x in dtime]
+    dtime = num2date(data2['time'],'seconds since 1970-01-01')
+    doy2 = [x.timetuple().tm_yday for x in dtime]
+    dtime = num2date(data3['time'],'seconds since 1970-01-01')
+    doy3 = [x.timetuple().tm_yday for x in dtime]
+    dtime = num2date(data4['time'],'seconds since 1970-01-01')
+    doy4 = [x.timetuple().tm_yday for x in dtime]
+
+sfc_tmp_plt = False
+if sfc_tmp_plt:
+    temp_data0,lat_data0, lon_data0 = [],[],[]
+    for ind in list(set(data0['CYCLE_NUMBER'])):
+        temp_data0 = temp_data0 + [max(data0['TEMP'][data0['CYCLE_NUMBER'] == ind])]
+        lat_data0 = lat_data0 + [max(data0['latitude'][data0['CYCLE_NUMBER'] == ind])]
+        lon_data0 = lon_data0 + [max(data0['longitude'][data0['CYCLE_NUMBER'] == ind])]
+    temp_data1,lat_data1, lon_data1 = [],[],[]
+    for ind in list(set(data1['CYCLE_NUMBER'])):
+        temp_data1 = temp_data1 + [max(data1['TEMP'][data1['CYCLE_NUMBER'] == ind])]
+        lat_data1 = lat_data1 + [max(data1['latitude'][data1['CYCLE_NUMBER'] == ind])]
+        lon_data1 = lon_data1 + [max(data1['longitude'][data1['CYCLE_NUMBER'] == ind])]
+    temp_data2,lat_data2, lon_data2 = [],[],[]
+    for ind in list(set(data2['CYCLE_NUMBER'])):
+        temp_data2 = temp_data2 + [max(data2['TEMP'][data2['CYCLE_NUMBER'] == ind])]
+        lat_data2 = lat_data2 + [max(data2['latitude'][data2['CYCLE_NUMBER'] == ind])]
+        lon_data2 = lon_data2 + [max(data2['longitude'][data2['CYCLE_NUMBER'] == ind])]
+    temp_data3,lat_data3, lon_data3 = [],[],[]
+    for ind in list(set(data3['CYCLE_NUMBER'])):
+        temp_data3 = temp_data3 + [max(data3['TEMP'][data3['CYCLE_NUMBER'] == ind])]
+        lat_data3 = lat_data3 + [max(data3['latitude'][data3['CYCLE_NUMBER'] == ind])]
+        lon_data3 = lon_data3 + [max(data3['longitude'][data3['CYCLE_NUMBER'] == ind])]
+    temp_data4,lat_data4, lon_data4 = [],[],[]
+    for ind in list(set(data4['CYCLE_NUMBER'])):
+        temp_data4 = temp_data4 + [max(data4['TEMP'][data4['CYCLE_NUMBER'] == ind])]
+        lat_data4 = lat_data4 + [max(data4['latitude'][data4['CYCLE_NUMBER'] == ind])]
+        lon_data4 = lon_data4 + [max(data4['longitude'][data4['CYCLE_NUMBER'] == ind])]
+
+btm_tmp_plt = True
+if btm_tmp_plt:
+    temp_data0,lat_data0, lon_data0 = [],[],[]
+    for ind in list(set(data0['CYCLE_NUMBER'])):
+        temp_data0 = temp_data0 + [min(data0['TEMP'][data0['CYCLE_NUMBER'] == ind])]
+        lat_data0 = lat_data0 + [min(data0['latitude'][data0['CYCLE_NUMBER'] == ind])]
+        lon_data0 = lon_data0 + [min(data0['longitude'][data0['CYCLE_NUMBER'] == ind])]
+    temp_data1,lat_data1, lon_data1 = [],[],[]
+    for ind in list(set(data1['CYCLE_NUMBER'])):
+        temp_data1 = temp_data1 + [min(data1['TEMP'][data1['CYCLE_NUMBER'] == ind])]
+        lat_data1 = lat_data1 + [min(data1['latitude'][data1['CYCLE_NUMBER'] == ind])]
+        lon_data1 = lon_data1 + [min(data1['longitude'][data1['CYCLE_NUMBER'] == ind])]
+    temp_data2,lat_data2, lon_data2 = [],[],[]
+    for ind in list(set(data2['CYCLE_NUMBER'])):
+        temp_data2 = temp_data2 + [min(data2['TEMP'][data2['CYCLE_NUMBER'] == ind])]
+        lat_data2 = lat_data2 + [min(data2['latitude'][data2['CYCLE_NUMBER'] == ind])]
+        lon_data2 = lon_data2 + [min(data2['longitude'][data2['CYCLE_NUMBER'] == ind])]
+    temp_data3,lat_data3, lon_data3 = [],[],[]
+    for ind in list(set(data3['CYCLE_NUMBER'])):
+        temp_data3 = temp_data3 + [min(data3['TEMP'][data3['CYCLE_NUMBER'] == ind])]
+        lat_data3 = lat_data3 + [min(data3['latitude'][data3['CYCLE_NUMBER'] == ind])]
+        lon_data3 = lon_data3 + [min(data3['longitude'][data3['CYCLE_NUMBER'] == ind])]
+    temp_data4,lat_data4, lon_data4 = [],[],[]
+    for ind in list(set(data4['CYCLE_NUMBER'])):
+        temp_data4 = temp_data4 + [min(data4['TEMP'][data4['CYCLE_NUMBER'] == ind])]
+        lat_data4 = lat_data4 + [min(data4['latitude'][data4['CYCLE_NUMBER'] == ind])]
+        lon_data4 = lon_data4 + [min(data4['longitude'][data4['CYCLE_NUMBER'] == ind])]
 
 #### plot
 etopo_levels=[-1000, -100, -50, -25, ]  #chuckchi
@@ -183,24 +241,55 @@ m = Basemap(resolution='i',projection='merc', llcrnrlat=y1, \
 
 elons, elats = np.meshgrid(elons, elats)
 ex, ey = m(elons, elats)
-xd0,yd0 = m(data0['longitude'],data0['latitude'])
-xd1,yd1 = m(data1['longitude'],data1['latitude'])
-xd2,yd2 = m(data2['longitude'],data2['latitude'])
-xd3,yd3 = m(data3['longitude'],data3['latitude'])
-xd4,yd4 = m(data4['longitude'],data4['latitude'])
+if doy_plt:
+    xd0,yd0 = m(data0['longitude'],data0['latitude'])
+    xd1,yd1 = m(data1['longitude'],data1['latitude'])
+    xd2,yd2 = m(data2['longitude'],data2['latitude'])
+    xd3,yd3 = m(data3['longitude'],data3['latitude'])
+    xd4,yd4 = m(data4['longitude'],data4['latitude'])
+if sfc_tmp_plt:
+    xd0,yd0 = m(lon_data0,lat_data0)
+    xd1,yd1 = m(lon_data1,lat_data1)
+    xd2,yd2 = m(lon_data2,lat_data2)
+    xd3,yd3 = m(lon_data3,lat_data3)
+    xd4,yd4 = m(lon_data4,lat_data4)
+if btm_tmp_plt:
+    xd0,yd0 = m(lon_data0,lat_data0)
+    xd1,yd1 = m(lon_data1,lat_data1)
+    xd2,yd2 = m(lon_data2,lat_data2)
+    xd3,yd3 = m(lon_data3,lat_data3)
+    xd4,yd4 = m(lon_data4,lat_data4)
 
 #CS = m.imshow(topoin, cmap='Greys_r') #
 CS_l = m.contour(ex,ey,topoin, levels=etopo_levels, linestyle='--', linewidths=0.2, colors='black', alpha=.75) 
 CS = m.contourf(ex,ey,topoin, levels=etopo_levels, colors=('#737373','#969696','#bdbdbd','#d9d9d9','#f0f0f0'), extend='both', alpha=.75) 
 plt.clabel(CS_l, inline=1, fontsize=8, fmt='%1.0f')
 
-m.scatter(xd0,yd0,40,marker='.', edgecolors='none', c=doy0, vmin=120, vmax=300, cmap='viridis')
-m.scatter(xd1,yd1,40,marker='.', edgecolors='none', c=doy1, vmin=120, vmax=300, cmap='viridis')
-m.scatter(xd2,yd2,40,marker='.', edgecolors='none', c=doy2, vmin=120, vmax=300, cmap='viridis')
-m.scatter(xd3,yd3,40,marker='.', edgecolors='none', c=doy3, vmin=120, vmax=300, cmap='viridis')
-m.scatter(xd4,yd4,40,marker='.', edgecolors='none', c=doy4, vmin=120, vmax=300, cmap='viridis')
-c = plt.colorbar()
-c.set_label("Julian Day")
+if doy_plt:
+    m.scatter(xd0,yd0,40,marker='.', edgecolors='none', c=doy0, vmin=120, vmax=300, cmap='viridis')
+    m.scatter(xd1,yd1,40,marker='.', edgecolors='none', c=doy1, vmin=120, vmax=300, cmap='viridis')
+    m.scatter(xd2,yd2,40,marker='.', edgecolors='none', c=doy2, vmin=120, vmax=300, cmap='viridis')
+    m.scatter(xd3,yd3,40,marker='.', edgecolors='none', c=doy3, vmin=120, vmax=300, cmap='viridis')
+    m.scatter(xd4,yd4,40,marker='.', edgecolors='none', c=doy4, vmin=120, vmax=300, cmap='viridis')
+    c = plt.colorbar()
+    c.set_label("Julian Day")
+if sfc_tmp_plt:
+    m.scatter(xd0,yd0,40,marker='.', edgecolors='none', c=temp_data0, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd1,yd1,40,marker='.', edgecolors='none', c=temp_data1, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd2,yd2,40,marker='.', edgecolors='none', c=temp_data2, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd3,yd3,40,marker='.', edgecolors='none', c=temp_data3, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd4,yd4,40,marker='.', edgecolors='none', c=temp_data4, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    c = plt.colorbar()
+    c.set_label("~SFC Temperature")
+if btm_tmp_plt:
+    m.scatter(xd0,yd0,40,marker='.', edgecolors='none', c=temp_data0, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd1,yd1,40,marker='.', edgecolors='none', c=temp_data1, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd2,yd2,40,marker='.', edgecolors='none', c=temp_data2, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd3,yd3,40,marker='.', edgecolors='none', c=temp_data3, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd4,yd4,40,marker='.', edgecolors='none', c=temp_data4, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    c = plt.colorbar()
+    c.set_label("~SFC Temperature")
+
 
 m.plot(xd0[0],yd0[0], '+', markersize=10, color='k')
 m.plot(xd1[0],yd1[0], '+', markersize=10, color='k')
@@ -218,5 +307,5 @@ m.fillcontinents(color='white')
 
 DefaultSize = fig.get_size_inches()
 fig.set_size_inches( (DefaultSize[0]*1.5, DefaultSize[1]*1.5) )
-plt.savefig('images/ArcticHeat_Alamo_etopo1.png', bbox_inches='tight', dpi=300)
+plt.savefig('images/ArcticHeat_Alamo_etopo1_temp_btm.png', bbox_inches='tight', dpi=300)
 plt.close()
