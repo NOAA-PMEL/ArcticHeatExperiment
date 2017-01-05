@@ -83,12 +83,12 @@ parser.add_argument('--maxdepth', type=float,
 	help="known bathymetric depth at location")
 parser.add_argument('--paramspan', nargs='+', type=float, 
 	help="max,min of parameter")
-parser.add_argument('--multiparamspan', nargs='+', type=float, 
-	help="max,min of parameter")
-parser.add_argument('-alamo','--alamofloats', action="store_true",
+parser.add_argument('-alamo','--alamofloats', type=str,
 	help='work with alamo float data in sql database')
 parser.add_argument('-alamocycle','--alamofloats_cycle', type=int, nargs=2,
 	help='start and stop range for cycle number')
+parser.add_argument('-plot_cbz','--plot_cb_zero', type=float, 
+	help='Colorbar inflection value for divergent color scheme')
 args = parser.parse_args()
 
 #TODO: Duplicate code in xbt/axctd data can be combined to a more simpler routine
@@ -247,24 +247,25 @@ if args.alamofloats and not (args.alamofloats_cycle[0] == args.alamofloats_cycle
 
 	figscale = endcycle-startcycle
 
-	fig = plt.figure(1, figsize=(figscale, 3), facecolor='w', edgecolor='w')
+	fig = plt.figure(1, figsize=(figscale/3, 3), facecolor='w', edgecolor='w')
 	ax1 = fig.add_subplot(111)
 	plt.hold(True)
 
 	for cycle in range(startcycle,endcycle+1,1):
 		offset = cycle - startcycle
+		offset = 0
 		#get db meta information for mooring
-		table = '9085'
+		table = args.alamofloats
 		Profile = EcoFOCI_db.read_profile(table=table, CycleNumber=cycle, verbose=True)
 
 		Pressure = np.array(sorted(Profile.keys()))
 		Temperature = np.array([Profile[x]['Temperature'] for x in sorted(Profile.keys()) ])
 
 
-		p1 = ax1.scatter(Temperature+offset,Pressure,30,marker='.', edgecolors='none', c=Temperature, 
-	        norm=MidpointNormalize(midpoint=1.5),
+		p1 = ax1.scatter(Temperature+3*offset,Pressure,45,marker='.', edgecolors='none', c=Temperature, 
+	        norm=MidpointNormalize(midpoint=args.plot_cb_zero),
 	        vmin=args.paramspan[0], vmax=args.paramspan[1], 
-	        cmap='RdYlBu_r')#seismic or RdBu_r
+	        cmap='RdBu_r')#seismic or RdBu_r
 
 	#p1 = ax1.plot(np.zeros_like(Pressure),Pressure,'grey',linewidth=.15)
 	#ax1.set_yticks(np.arange(0.,args.maxdepth + 25.,10.))
@@ -272,7 +273,7 @@ if args.alamofloats and not (args.alamofloats_cycle[0] == args.alamofloats_cycle
 	if args.maxdepth:
 		ax1.set_ylim([0,args.maxdepth])
 
-	ax1.set_xlim([args.paramspan[0],args.paramspan[1]+figscale+1])
+	ax1.set_xlim([args.paramspan[0],args.paramspan[1]+3*figscale+1])
 
 	plt.colorbar(p1)
 	ax1.invert_yaxis()
