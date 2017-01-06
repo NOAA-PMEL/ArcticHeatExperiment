@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 # Visual Stack
 import matplotlib as mpl
-mpl.use('Agg') 
+#mpl.use('Agg') 
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
@@ -90,7 +90,7 @@ args = parser.parse_args()
 #####
 # alamo floats
 #
-if args.alamofloats and (args.alamofloats_cycle[0] ==args.alamofloats_cycle[1] ):
+if args.alamofloats and (args.alamofloats_cycle[0] ==args.alamofloats_cycle[1] ) and not args.contour_plot:
 
 	startcycle=args.alamofloats_cycle[0]
 	endcycle=args.alamofloats_cycle[1]
@@ -139,7 +139,7 @@ if args.alamofloats and (args.alamofloats_cycle[0] ==args.alamofloats_cycle[1] )
 	plt.savefig(args.filepath + '.png', transparent=True, dpi = (150))
 	plt.close()
 
-if args.alamofloats and not (args.alamofloats_cycle[0] == args.alamofloats_cycle[1] ):
+if args.alamofloats and not (args.alamofloats_cycle[0] == args.alamofloats_cycle[1] ) and not args.contour_plot:
 
 	startcycle=args.alamofloats_cycle[0]
 	endcycle=args.alamofloats_cycle[1]
@@ -194,3 +194,36 @@ if args.alamofloats and not (args.alamofloats_cycle[0] == args.alamofloats_cycle
 	plt.close()
 
 	EcoFOCI_db.close()
+
+if args.contour_plot:
+
+	startcycle=args.alamofloats_cycle[0]
+	endcycle=args.alamofloats_cycle[1]
+
+	#get information from local config file - a json formatted file
+	config_file = 'EcoFOCI_config/db_config/db_config_alamofloats.pyini'
+
+
+	EcoFOCI_db = EcoFOCI_db_ALAMO()
+	(db,cursor) = EcoFOCI_db.connect_to_DB(db_config_file=config_file)
+
+	depth_array = np.arange(0,args.maxdepth+1,0.5) 
+	temparray = np.ones((endcycle-startcycle+2,len(depth_array)))*np.nan
+	ProfileTime = []
+	for cycle in range(startcycle,endcycle+1,1):
+		#get db meta information for mooring
+		table = args.alamofloats
+		Profile = EcoFOCI_db.read_profile(table=table, CycleNumber=cycle, verbose=True)
+
+		try:
+			ProfileTime = ProfileTime + [Profile[sorted(Profile.keys())[0]]['ProfileTime']]
+			Pressure = np.array(sorted(Profile.keys()))
+			Temperature = np.array([Profile[x]['Temperature'] for x in sorted(Profile.keys()) ])
+
+			temparray[cycle,:] = np.interp(depth_array,Pressure,Temperature)
+		except:
+			ProfileTime = ProfileTime + [np.nan]
+
+	fig = plt.figure(1, figsize=(9, 3), facecolor='w', edgecolor='w')
+	ax1 = fig.add_subplot(111)	
+	plt.contourf(ProfileTime,depth_array,temparray.T)
