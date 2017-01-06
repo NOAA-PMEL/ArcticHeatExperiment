@@ -21,11 +21,15 @@ import argparse
 
 import numpy as np
 import pandas as pd
+
 # Visual Stack
 import matplotlib as mpl
-#mpl.use('Agg') 
+mpl.use('Agg') 
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+from matplotlib.dates import YearLocator, WeekdayLocator, MonthLocator, DayLocator, HourLocator, DateFormatter
+import matplotlib.ticker as ticker
+import cmocean
 
 from io_utils.EcoFOCI_db_io import EcoFOCI_db_ALAMO
 
@@ -58,21 +62,21 @@ mpl.rcParams['xtick.color'] = 'grey'
 # From Joe Kington: This one gives two different linear ramps:
 
 class MidpointNormalize(colors.Normalize):
-    def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
-        self.midpoint = midpoint
-        colors.Normalize.__init__(self, vmin, vmax, clip)
+	def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
+		self.midpoint = midpoint
+		colors.Normalize.__init__(self, vmin, vmax, clip)
 
-    def __call__(self, value, clip=None):
-        # I'm ignoring masked values and all kinds of edge cases to make a
-        # simple example...
-        x, y = [self.vmin, self.midpoint, self.vmax], [0, 0.5, 1]
-        return np.ma.masked_array(np.interp(value, x, y))
+	def __call__(self, value, clip=None):
+		# I'm ignoring masked values and all kinds of edge cases to make a
+		# simple example...
+		x, y = [self.vmin, self.midpoint, self.vmax], [0, 0.5, 1]
+		return np.ma.masked_array(np.interp(value, x, y))
 
 """----------------------------- Main -------------------------------------"""
 
 parser = argparse.ArgumentParser(description='ArcticHeat ctd datafile parser ')
 parser.add_argument('filepath', metavar='filepath', type=str,
-               help='full path to file')
+			   help='full path to file')
 parser.add_argument('--maxdepth', type=float, 
 	help="known bathymetric depth at location")
 parser.add_argument('--paramspan', nargs='+', type=float, 
@@ -115,9 +119,9 @@ if args.alamofloats and (args.alamofloats_cycle[0] ==args.alamofloats_cycle[1] )
 	fig = plt.figure(1, figsize=(1, 3), facecolor='w', edgecolor='w')
 	ax1 = fig.add_subplot(111)
 	p1 = ax1.scatter(Temperature,Pressure,8,marker='.', edgecolors='none', c=Temperature, 
-        norm=MidpointNormalize(midpoint=0.),
-        vmin=args.paramspan[0], vmax=args.paramspan[1], 
-        cmap='seismic')
+		norm=MidpointNormalize(midpoint=0.),
+		vmin=args.paramspan[0], vmax=args.paramspan[1], 
+		cmap='seismic')
 
 	p1 = ax1.plot(np.zeros_like(Pressure),Pressure,'grey',linewidth=.15)
 	ax1.set_yticks(np.arange(0.,args.maxdepth + 25.,10.))
@@ -159,7 +163,6 @@ if args.alamofloats and not (args.alamofloats_cycle[0] == args.alamofloats_cycle
 
 	for cycle in range(startcycle,endcycle+1,1):
 		offset = cycle - startcycle
-		offset = 0
 		#get db meta information for mooring
 		table = args.alamofloats
 		Profile = EcoFOCI_db.read_profile(table=table, CycleNumber=cycle, verbose=True)
@@ -168,10 +171,10 @@ if args.alamofloats and not (args.alamofloats_cycle[0] == args.alamofloats_cycle
 		Temperature = np.array([Profile[x]['Temperature'] for x in sorted(Profile.keys()) ])
 
 
-		p1 = ax1.scatter(Temperature+3*offset,Pressure,45,marker='.', edgecolors='none', c=Temperature, 
-	        norm=MidpointNormalize(midpoint=args.plot_cb_zero),
-	        vmin=args.paramspan[0], vmax=args.paramspan[1], 
-	        cmap='RdBu_r')#seismic or RdBu_r
+		p1 = ax1.scatter(Temperature+1*offset,Pressure,45,marker='.', edgecolors='none', c=Temperature, 
+			norm=MidpointNormalize(midpoint=args.plot_cb_zero),
+			vmin=args.paramspan[0], vmax=args.paramspan[1], 
+			cmap=cmocean.cm.thermal)#seismic or RdBu_r
 
 	#p1 = ax1.plot(np.zeros_like(Pressure),Pressure,'grey',linewidth=.15)
 	#ax1.set_yticks(np.arange(0.,args.maxdepth + 25.,10.))
@@ -179,7 +182,7 @@ if args.alamofloats and not (args.alamofloats_cycle[0] == args.alamofloats_cycle
 	if args.maxdepth:
 		ax1.set_ylim([0,args.maxdepth])
 
-	ax1.set_xlim([args.paramspan[0],args.paramspan[1]+3*figscale+1])
+	ax1.set_xlim([args.paramspan[0],args.paramspan[1]+1*figscale+1])
 
 	plt.colorbar(p1)
 	ax1.invert_yaxis()
@@ -208,22 +211,50 @@ if args.contour_plot:
 	(db,cursor) = EcoFOCI_db.connect_to_DB(db_config_file=config_file)
 
 	depth_array = np.arange(0,args.maxdepth+1,0.5) 
-	temparray = np.ones((endcycle-startcycle+2,len(depth_array)))*np.nan
+	num_cycles = EcoFOCI_db.count(table=args.alamofloats, start=startcycle, end=endcycle)
+	temparray = np.ones((num_cycles,len(depth_array)))*np.nan
 	ProfileTime = []
+	cycle_col=0
+
+	fig = plt.figure(1, figsize=(12, 3), facecolor='w', edgecolor='w')
+	ax1 = fig.add_subplot(111)		
 	for cycle in range(startcycle,endcycle+1,1):
 		#get db meta information for mooring
-		table = args.alamofloats
-		Profile = EcoFOCI_db.read_profile(table=table, CycleNumber=cycle, verbose=True)
+		Profile = EcoFOCI_db.read_profile(table=args.alamofloats, CycleNumber=cycle, verbose=True)
 
 		try:
-			ProfileTime = ProfileTime + [Profile[sorted(Profile.keys())[0]]['ProfileTime']]
+			temp_time =  Profile[sorted(Profile.keys())[0]]['ProfileTime']
+			ProfileTime = ProfileTime + [temp_time]
 			Pressure = np.array(sorted(Profile.keys()))
 			Temperature = np.array([Profile[x]['Temperature'] for x in sorted(Profile.keys()) ])
 
-			temparray[cycle,:] = np.interp(depth_array,Pressure,Temperature)
-		except:
-			ProfileTime = ProfileTime + [np.nan]
+			temparray[cycle_col,:] = np.interp(depth_array,Pressure,Temperature,left=np.nan,right=np.nan)
+			cycle_col +=1
+	
+			xtime = np.ones_like(np.array(sorted(Profile.keys()))) * mpl.dates.date2num(temp_time)
+			#turn off below and set zorder to 1 for no scatter plot colored by points
+			plt.scatter(x=xtime, y=np.array(sorted(Profile.keys())),s=1,marker='.', edgecolors='none', c='k', zorder=3, alpha=0.3) 
+			
+			plt.scatter(x=xtime, y=np.array(sorted(Profile.keys())),s=15,marker='.', edgecolors='none', c=Temperature, 
+			vmin=args.paramspan[0], vmax=args.paramspan[1], 
+			cmap=cmocean.cm.thermal, zorder=1)
+		except IndexError:
+			pass
 
-	fig = plt.figure(1, figsize=(9, 3), facecolor='w', edgecolor='w')
-	ax1 = fig.add_subplot(111)	
-	plt.contourf(ProfileTime,depth_array,temparray.T)
+
+	cbar = plt.colorbar()
+	cbar.set_label('Temperature (C)',rotation=0, labelpad=90)
+	plt.contourf(ProfileTime,depth_array,temparray.T, 
+		extend='both', cmap=cmocean.cm.thermal, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=1.0)
+
+	ax1.invert_yaxis()
+	ax1.xaxis.set_major_locator(DayLocator(bymonthday=15))
+	ax1.xaxis.set_minor_locator(DayLocator(bymonthday=[5,10,15,20,25,30]))
+	ax1.xaxis.set_major_formatter(ticker.NullFormatter())
+	ax1.xaxis.set_minor_formatter(DateFormatter('%d'))
+	ax1.xaxis.set_major_formatter(DateFormatter('%b %y'))
+	ax1.xaxis.set_tick_params(which='major', pad=15)
+
+	plt.tight_layout()
+	plt.savefig(args.filepath + '.png', transparent=False, dpi = (300))
+	plt.close()

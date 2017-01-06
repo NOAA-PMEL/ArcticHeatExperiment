@@ -37,19 +37,19 @@ class EcoFOCI_db_ALAMO(object):
 		Parameters
 		----------
 		db_config_file : str
-		    full path to json formatted database config file    
+			full path to json formatted database config file    
 
 		"""
 		self.db_config = ConfigParserLocal.get_config(db_config_file)
 		try:
-		    self.db = pymysql.connect(self.db_config['host'], 
-		    						  self.db_config['user'],
-		    						  self.db_config['password'], 
-		    						  self.db_config['database'], 
-		    						  self.db_config['port'])
+			self.db = pymysql.connect(self.db_config['host'], 
+									  self.db_config['user'],
+									  self.db_config['password'], 
+									  self.db_config['database'], 
+									  self.db_config['port'])
 		except:
-		    print "db error"
-		    
+			print "db error"
+			
 		# prepare a cursor object using cursor() method
 		self.cursor = self.db.cursor(pymysql.cursors.DictCursor)
 		return(self.db,self.cursor)
@@ -61,7 +61,7 @@ class EcoFOCI_db_ALAMO(object):
 		Parameters
 		----------
 		host : str
-		    ip or domain name of host
+			ip or domain name of host
 		user : str
 			account user
 		password : str
@@ -79,45 +79,66 @@ class EcoFOCI_db_ALAMO(object):
 		self.db_config['port'] = port
 
 		try:
-		    self.db = pymysql.connect(self.db_config['host'], 
-		    						  self.db_config['user'],
-		    						  self.db_config['password'], 
-		    						  self.db_config['database'], 
-		    						  self.db_config['port'])
+			self.db = pymysql.connect(self.db_config['host'], 
+									  self.db_config['user'],
+									  self.db_config['password'], 
+									  self.db_config['database'], 
+									  self.db_config['port'])
 		except:
-		    print "db error"
-		    
+			print "db error"
+			
 		# prepare a cursor object using cursor() method
 		self.cursor = self.db.cursor(pymysql.cursors.DictCursor)
 		return(self.db,self.cursor)
 
 	def read_profile(self, table=None, CycleNumber=None, verbose=False):
-	    
+		
 		sql = ("SELECT * from `{0}` WHERE `CycleNumber`= '{1}' ORDER BY `id` DESC ").format(table, CycleNumber)
 
 		if verbose:
-		    print sql
+			print sql
 
 		result_dic = {}
 		try:
-		    # Execute the SQL command
-		    self.cursor.execute(sql)
-		    # Get column names
-		    rowid = {}
-		    counter = 0
-		    for i in self.cursor.description:
-		        rowid[i[0]] = counter
-		        counter = counter +1 
-		    #print rowid
-		    # Fetch all the rows in a list of lists.
-		    results = self.cursor.fetchall()
-		    for row in results:
-		        result_dic[row['Pressure']] ={keys: row[keys] for val, keys in enumerate(row.keys())} 
-		    return (result_dic)
+			# Execute the SQL command
+			self.cursor.execute(sql)
+			# Get column names
+			rowid = {}
+			counter = 0
+			for i in self.cursor.description:
+				rowid[i[0]] = counter
+				counter = counter +1 
+			#print rowid
+			# Fetch all the rows in a list of lists.
+			results = self.cursor.fetchall()
+			for row in results:
+				result_dic[row['Pressure']] ={keys: row[keys] for val, keys in enumerate(row.keys())} 
+			return (result_dic)
 		except:
-		    print "Error: unable to fecth data"
+			print "Error: unable to fetch data"
 
+	def count(self, table=None, start=None, end=None, verbose=False):
+		sql = ("SELECT count(*) FROM (SELECT * FROM `{table}` where `CycleNumber` between"
+			   " {start} and {end} group by `CycleNumber`) as temp").format(table=table, start=start, end=end)
 
+		if verbose:
+			print sql	
+
+		try:
+			# Execute the SQL command
+			self.cursor.execute(sql)
+			# Get column names
+			rowid = {}
+			counter = 0
+			for i in self.cursor.description:
+				rowid[i[0]] = counter
+				counter = counter +1 
+			#print rowid
+			# Fetch all the rows in a list of lists.
+			results = self.cursor.fetchall()
+			return results[0]['count(*)']
+		except:
+			print "Error: unable to fetch data"
 	def close(self):
 		"""close database"""
 		self.db.close()
