@@ -13,6 +13,7 @@ import argparse
 import pygeoj
 
 #Science Stack
+from netCDF4 import Dataset, date2num, num2date
 import numpy as np
 
 # Plotting Stack
@@ -23,6 +24,8 @@ import matplotlib.ticker as ticker
 import cartopy.feature as cfeature
 import cartopy.crs as ccrs
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+from mpl_toolkits.basemap import Basemap, shiftgrid
+import cmocean
 
 __author__   = 'Shaun Bell'
 __email__    = 'shaun.bell@noaa.gov'
@@ -32,6 +35,20 @@ __version__  = "0.1.0"
 __status__   = "Development"
 __keywords__ = 'arctic heat mapping', 'wood', 'kevin'
 
+def etopo1_subset(region=None, file=None):
+    """ read in ardemV2 topography/bathymetry. 
+    file='/Volumes/WDC_internal/Users/bell/in_and_outbox/MapGrids/etopo_subsets/etopo1_chukchi.nc'
+
+    """
+    
+    bathydata = Dataset(file)
+    
+    topoin = bathydata.variables['Band1'][:]
+    lons = bathydata.variables['lon'][:]
+    lats = bathydata.variables['lat'][:]
+    bathydata.close()
+    
+    return(topoin, lats, lons)
 
 # Example of making your own norm.  Also see matplotlib.colors.
 # From Joe Kington: This one gives two different linear ramps:
@@ -54,21 +71,21 @@ parser = argparse.ArgumentParser(description='Map')
 parser.add_argument('sourcedir', metavar='sourcedir', type=str, help='full path to file')
 parser.add_argument('mapdir', metavar='mapdir', type=str, help='full path to file')
 parser.add_argument('maxalt', metavar='maxalt', type=float, help='altitude above which data is ignored')
-parser.add_argument('--stations', type=str, help='optional full path to geojson file')
+parser.add_argument('--xbt', type=str, help='optional full path to excel  file')
 args = parser.parse_args()
 
 ## read data in
-data = pd.read_csv(args.sourcedir,names=['lat','lon','alt','sst','pyro'],header=0)
+data = pd.read_csv(args.sourcedir,names=['lon','lat','alt','sst','pyro'],header=0)
 
-if args.stations:
-    geo_data = pygeoj.load(filepath=args.stations)
+if args.xbt:
+    xbt = pd.read_excel(args.sourcedir,names=['lat','lon','alt','sst','pyro','Thermocline','5mTemp'],header=0)
 
 range_int = 1.
 extent = [data['lat'].min()-range_int, data['lat'].max()+range_int, \
           data['lon'].min()-range_int, data['lon'].max()+range_int]
 data['sst'][data['alt'] > args.maxalt] = np.nan
 
-maptype='cartopy'
+maptype='basemap'
 if maptype == 'cartopy':
     
     fig = plt.figure()
@@ -90,7 +107,7 @@ if maptype == 'cartopy':
         cmap='seismic', transform=ccrs.PlateCarree(), zorder=2)
     c = plt.colorbar(extend='both', shrink=0.50)
 
-    if args.stations:
+    if args.xbt:
         for feature in geodata:
             (glat,glon) = feature.geometry.coordinates
             plt.scatter(glat,glon,10,
@@ -107,4 +124,67 @@ if maptype == 'cartopy':
     g1.xlabels_top = True
 
     plt.savefig('ArcticHeat_SST.png', dpi = (300))
+    plt.close()
+
+elif maptype == 'basemap':
+    etopo_levels=[-1000, -100, -50, -25, ]  #chuckchi
+
+    (topoin, elats, elons) = etopo1_subset(file=args.mapdir)
+    #(topoin, elats, elons) = etopo5_data()
+
+
+
+    #determine regional bounding
+    y1 = np.floor(data['lat'].min()-2.5)
+    y2 = np.ceil(data['lat'].max()+2.5)
+    x1 = np.ceil((data['lon'].min()-5))
+    x2 = np.floor((data['lon'].max()+5))
+    print y1,y2,x1,x2
+
+
+    fig = plt.figure()
+    ax = plt.subplot(111)
+    
+    """        
+    m = Basemap(resolution='i',projection='merc', llcrnrlat=y1, \
+                urcrnrlat=y2,llcrnrlon=x1,urcrnrlon=x2,\
+                lat_ts=45)
+    """
+    m = Basemap(resolution='i',projection='merc', llcrnrlat=66, \
+                urcrnrlat=74,llcrnrlon=-170,urcrnrlon=-150,\
+                lat_ts=45)
+
+    elons, elats = np.meshgrid(elons, elats)
+    ex, ey = m(elons, elats)
+    xd0,yd0 = m(data['lon'].values,data['lat'].values)
+
+    #CS = m.imshow(topoin, cmap='Greys_r') #
+    CS_l = m.contour(ex,ey,topoin, levels=etopo_levels, linestyle='--', linewidths=0.2, colors='black', alpha=.75) 
+    CS = m.contourf(ex,ey,topoin, levels=etopo_levels, colors=('#737373','#969696','#bdbdbd','#d9d9d9','#f0f0f0'), extend='both', alpha=.75) 
+    plt.clabel(CS_l, inline=1, fontsize=8, fmt='%1.0f')
+
+    m.scatter(xd0,yd0,25,marker='.', edgecolors='none', c=data['sst'].values, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    c = plt.colorbar()
+    c.set_label("Rad SST / Flight Path")
+
+    if args.xbt:
+        m.scatter(xd0,yd0,100,marker='0', edgecolors='none', c=temp_data0, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+        c = plt.colorbar()
+        c.set_label("5m Temp")
+
+
+        m.plot(xd0[0],yd0[0], '+', markersize=10, color='k')
+        m.plot(xd1[0],yd1[0], '+', markersize=10, color='k')
+
+    #m.drawcountries(linewidth=0.5)
+    m.drawcoastlines(linewidth=0.5)
+    m.drawparallels(np.arange(y1-10,y2+10,2.),labels=[1,0,0,0],color='black',dashes=[1,1],labelstyle='+/-',linewidth=0.2) # draw parallels
+    m.drawmeridians(np.arange(x1-10,x2+10,4.),labels=[0,0,0,1],color='black',dashes=[1,1],labelstyle='+/-',linewidth=0.2) # draw meridians
+    m.fillcontinents(color='white')
+
+    #
+
+    DefaultSize = fig.get_size_inches()
+    fig.set_size_inches( (DefaultSize[0]*1.5, DefaultSize[1]*1.5) )
+    plt.savefig('images/ArcticHeat_Alamo_etopo1_flight.png', bbox_inches='tight', dpi=300)
     plt.close()

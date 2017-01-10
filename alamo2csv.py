@@ -49,7 +49,7 @@ __keywords__ = 'netCDF','meta','header', 'csv'
 def etopo1_subset(file='etopo1.nc', region=None):
     """ read in ardemV2 topography/bathymetry. """
     
-    file='/Users/bell/in_and_outbox/MapGrids/etopo_subsets/etopo1_chukchi.nc'
+    file='/Volumes/WDC_internal/Users/bell/in_and_outbox/MapGrids/etopo_subsets/etopo1_chukchi.nc'
     bathydata = Dataset(file)
     
     topoin = bathydata.variables['Band1'][:]
@@ -61,7 +61,7 @@ def etopo1_subset(file='etopo1.nc', region=None):
 
 def etopo5_data():
     """ read in etopo5 topography/bathymetry. """
-    file = '/Users/bell/in_and_outbox/MapGrids/etopo5.nc'
+    file = '/Volumes/WDC_internal/Users/bell/in_and_outbox/MapGrids/etopo5.nc'
     etopodata = Dataset(file)
     
     topoin = etopodata.variables['bath'][:]
@@ -77,7 +77,7 @@ def etopo5_data():
 
 def IBCAO_data():
     """ read in IBCAO topography/bathymetry. """
-    file_in = '/Users/bell/in_and_outbox/MapGrids/ARDEMv2.0.nc'
+    file_in = '/Volumes/WDC_internal/Users/bell/in_and_outbox/MapGrids/ARDEMv2.0.nc'
     IBCAOtopodata = Dataset(file_in)
     
     topoin = IBCAOtopodata.variables['z'][:]
@@ -103,8 +103,9 @@ parser.add_argument("-plts_out","--plots_out", action="store_true",
         help='generate plots')
 args = parser.parse_args()
 
-path = '/Users/bell/ecoraid/2016/Additional_FieldData/ArcticHeat/AlamoFloats/netcdf/'
-infile = ['arctic_heat_alamo_profiles_9058_9f75_d5e5_f5f9.nc','arctic_heat_alamo_profiles_9058_9f75_d5e5_f5f9.nc']
+path = '/Volumes/WDC_internal/Users/bell/ecoraid/2016/Additional_FieldData/ArcticHeat/AlamoFloats/netcdf/'
+infile = ['arctic_heat_alamo_profiles_9076_8a66_41a1_a1fa.nc',
+    'arctic_heat_alamo_profiles_9085_23b3_8ba3_1def.nc']
 
 ###nc readin/out
 df = EcoFOCI_netCDF(path+infile[0])
@@ -190,6 +191,8 @@ if args.plots_out:
     y2 = np.ceil(data0['latitude'].max()+2.5)
     x1 = np.ceil((data0['longitude'].min()-5))
     x2 = np.floor((data0['longitude'].max()+5))
+    print y1,y2,x1,x2
+
 
     fig = plt.figure()
     ax = plt.subplot(111)
@@ -218,8 +221,8 @@ if args.plots_out:
     plt.clabel(CS_l, inline=1, fontsize=8, fmt='%1.0f')
 
     if doy_plt:
-        m.scatter(xd0,yd0,100,marker='.', edgecolors='none', c=doy0, vmin=120, vmax=300, cmap='viridis')
-        m.scatter(xd1,yd1,100,marker='.', edgecolors='none', c=doy1, vmin=120, vmax=300, cmap='viridis')
+        m.scatter(xd0,yd0,100,marker='.', edgecolors='none', c=doy0, vmin=245, vmax=360, cmap='viridis')
+        m.scatter(xd1,yd1,100,marker='.', edgecolors='none', c=doy1, vmin=245, vmax=360, cmap='viridis')
         c = plt.colorbar()
         c.set_label("DOY")
     if sfc_tmp_plt:
