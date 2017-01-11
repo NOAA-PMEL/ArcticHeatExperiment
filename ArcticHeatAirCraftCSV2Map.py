@@ -71,19 +71,19 @@ parser = argparse.ArgumentParser(description='Map')
 parser.add_argument('sourcedir', metavar='sourcedir', type=str, help='full path to file')
 parser.add_argument('mapdir', metavar='mapdir', type=str, help='full path to file')
 parser.add_argument('maxalt', metavar='maxalt', type=float, help='altitude above which data is ignored')
-parser.add_argument('--xbt', type=str, help='optional full path to excel  file')
+parser.add_argument('--xbt', type=str, help='optional full path to excel file')
 args = parser.parse_args()
 
 ## read data in
 data = pd.read_csv(args.sourcedir,names=['lon','lat','alt','sst','pyro'],header=0)
 
 if args.xbt:
-    xbt = pd.read_excel(args.sourcedir,names=['lat','lon','alt','sst','pyro','Thermocline','5mTemp'],header=0)
+    xbt = pd.read_excel(args.xbt,header=0)
 
 range_int = 1.
 extent = [data['lat'].min()-range_int, data['lat'].max()+range_int, \
           data['lon'].min()-range_int, data['lon'].max()+range_int]
-data['sst'][data['alt'] > args.maxalt] = np.nan
+
 
 maptype='basemap'
 if maptype == 'cartopy':
@@ -163,18 +163,27 @@ elif maptype == 'basemap':
     CS = m.contourf(ex,ey,topoin, levels=etopo_levels, colors=('#737373','#969696','#bdbdbd','#d9d9d9','#f0f0f0'), extend='both', alpha=.75) 
     plt.clabel(CS_l, inline=1, fontsize=8, fmt='%1.0f')
 
-    m.scatter(xd0,yd0,25,marker='.', edgecolors='none', c=data['sst'].values, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+    m.scatter(xd0,yd0,5,marker='.', edgecolors='none', color='black',zorder=2)
+    data['sst'][data['alt'] > args.maxalt] = np.nan
+    m.scatter(xd0,yd0,25,marker='.', edgecolors='none', c=data['sst'].values, vmin=-4, vmax=10, cmap=cmocean.cm.thermal, zorder=2)
     c = plt.colorbar()
     c.set_label("Rad SST / Flight Path")
 
     if args.xbt:
-        m.scatter(xd0,yd0,100,marker='0', edgecolors='none', c=temp_data0, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+        """
+        m.scatter(xd0,yd0,100,marker='o', edgecolors='none', c=temp_data0, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
         c = plt.colorbar()
         c.set_label("5m Temp")
-
-
-        m.plot(xd0[0],yd0[0], '+', markersize=10, color='k')
-        m.plot(xd1[0],yd1[0], '+', markersize=10, color='k')
+        """
+        ind =xbt[xbt['Thermocline']==0].index.tolist()
+        xd1,yd1=m(xbt.Longitude[ind].values,xbt.Latitude[ind].values)
+        m.scatter(xd1,yd1,50,marker='o', facecolors='none', edgecolors='k')
+        ind =xbt[xbt['Thermocline']==1].index.tolist()
+        xd1,yd1=m(xbt.Longitude[ind].values,xbt.Latitude[ind].values)
+        m.scatter(xd1,yd1,50,marker='o', facecolors='k', edgecolors='k')
+        ind =xbt[xbt['Thermocline']==-99].index.tolist()
+        xd1,yd1=m(xbt.Longitude[ind].values,xbt.Latitude[ind].values)
+        m.scatter(xd1,yd1,50,marker='x', facecolors='k', edgecolors='k')
 
     #m.drawcountries(linewidth=0.5)
     m.drawcoastlines(linewidth=0.5)
