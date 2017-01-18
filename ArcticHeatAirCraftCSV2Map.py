@@ -183,7 +183,7 @@ elif maptype == 'basemap':
         m.scatter(xd1,yd1,50,marker='o', facecolors='k', edgecolors='k')
         ind =xbt[xbt['Thermocline']==-99].index.tolist()
         xd1,yd1=m(xbt.Longitude[ind].values,xbt.Latitude[ind].values)
-        m.scatter(xd1,yd1,50,marker='x', facecolors='k', edgecolors='k')
+        m.scatter(xd1,yd1,50,marker='x', facecolors='k', edgecolors='k', zorder=2)
 
     #m.drawcountries(linewidth=0.5)
     m.drawcoastlines(linewidth=0.5)
