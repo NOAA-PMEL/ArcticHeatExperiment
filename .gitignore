@@ -1,6 +1,6 @@
-<<<<<<< HEAD
 =======
 EcoFOCI_config/db_config
 
 *.pyc
->>>>>>> origin/master
+
+images/*
