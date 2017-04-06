@@ -4,7 +4,7 @@ progdir="/Volumes/WDC_internal/Users/bell/Programs/Python/FOCI_Analysis/ArcticHe
 
 for i in `seq 1 90`;
 do
-        python ${progdir}worldview_modis_wget.py ${i} Aqua jpeg large --bbox -180 39.5 -121.25 72.5
+        python ${progdir}worldview_modis_wget.py ${i} Viirs jpeg large --bbox -180 39.5 -121.25 72.5
 done  
 
 img_dir="/Volumes/WDC_internal/Users/bell/Programs/Python/FOCI_Analysis/ArcticHeatExperiment/*.jpeg"
