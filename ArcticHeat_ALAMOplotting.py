@@ -58,6 +58,9 @@ mpl.rcParams['ytick.direction'] = 'out'
 mpl.rcParams['xtick.direction'] = 'out'
 mpl.rcParams['ytick.color'] = 'grey'
 mpl.rcParams['xtick.color'] = 'grey'
+mpl.rcParams['font.family'] = 'Arial'
+mpl.rcParams['svg.fonttype'] = 'none'
+
 # Example of making your own norm.  Also see matplotlib.colors.
 # From Joe Kington: This one gives two different linear ramps:
 
@@ -242,8 +245,8 @@ if args.contour_plot:
 			pass
 
 
-	cbar = plt.colorbar()
-	cbar.set_label('Temperature (C)',rotation=0, labelpad=90)
+	#cbar = plt.colorbar()
+	#cbar.set_label('Temperature (C)',rotation=0, labelpad=90)
 	plt.contourf(ProfileTime,depth_array,temparray.T, 
 		extend='both', cmap=cmocean.cm.thermal, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=1.0)
 
@@ -253,7 +256,7 @@ if args.contour_plot:
 	ax1.xaxis.set_major_formatter(ticker.NullFormatter())
 	ax1.xaxis.set_minor_formatter(DateFormatter('%d'))
 	ax1.xaxis.set_major_formatter(DateFormatter('%b %y'))
-	ax1.xaxis.set_tick_params(which='major', pad=15)
+	ax1.xaxis.set_tick_params(which='major', pad=25)
 
 	plt.tight_layout()
 	plt.savefig(args.filepath + '.png', transparent=False, dpi = (300))
