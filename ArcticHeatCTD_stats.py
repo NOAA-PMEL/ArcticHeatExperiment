@@ -53,24 +53,32 @@ args = parser.parse_args()
 # axctd
 #
 if args.axctd:
-	axctddata = pd.read_csv(args.filepath, delim_whitespace=True, skiprows=4, na_values='*****')
+	axctddata = pd.read_excel(args.filepath, sheetname=0)
 
-	Tmax = axctddata['Temp'].where(axctddata['Depth'] <= args.maxdepth).max()
-	Tmin = axctddata['Temp'].where(axctddata['Depth'] <= args.maxdepth).min()
-	Tave = axctddata['Temp'].where(axctddata['Depth'] <= args.maxdepth).mean()
-	Tstd = axctddata['Temp'].where(axctddata['Depth'] <= args.maxdepth).std()
+	bins = np.arange(0,args.maxdepth,0.5)
+	axctd_0p5m_bin = axctddata.groupby(np.digitize(axctddata.Depth,bins)).median()
 
-	print("{file},{mean},{min},{max},{std}".format(file=args.filepath,mean=Tave,min=Tmin,max=Tmax,std=Tstd))
+	Tmax = axctd_0p5m_bin['Temp'].where(axctd_0p5m_bin['Depth'] <= args.maxdepth).max()
+	Tmin = axctd_0p5m_bin['Temp'].where(axctd_0p5m_bin['Depth'] <= args.maxdepth).min()
+	Tave = axctd_0p5m_bin['Temp'].where(axctd_0p5m_bin['Depth'] <= args.maxdepth).mean()
+	Tmid = axctd_0p5m_bin['Temp'].where(axctd_0p5m_bin['Depth'] <= args.maxdepth).median()
+	Tstd = axctd_0p5m_bin['Temp'].where(axctd_0p5m_bin['Depth'] <= args.maxdepth).std()
+
+	print("{file},{mean},{min},{max},{mid},{std}".format(file=args.filepath,mean=Tave,min=Tmin,max=Tmax,mid=Tmid,std=Tstd))
 
 #####
 # xbt
 #
 if args.xbt:
 	xbtdata = pd.read_csv(args.filepath, delim_whitespace=True, skiprows=3, na_values='******')
+	
+	bins = np.arange(0,args.maxdepth,0.5)
+	xbt_0p5m_bin = xbtdata.groupby(np.digitize(xbtdata.Depth,bins)).median()
 
-	Tmax = xbtdata['(C)'].where(xbtdata['Depth'] <= args.maxdepth).max()
-	Tmin = xbtdata['(C)'].where(xbtdata['Depth'] <= args.maxdepth).min()
-	Tave = xbtdata['(C)'].where(xbtdata['Depth'] <= args.maxdepth).mean()
-	Tstd = xbtdata['(C)'].where(xbtdata['Depth'] <= args.maxdepth).std()
+	Tmax = xbt_0p5m_bin['(C)'].where(xbt_0p5m_bin['Depth'] <= args.maxdepth).max()
+	Tmin = xbt_0p5m_bin['(C)'].where(xbt_0p5m_bin['Depth'] <= args.maxdepth).min()
+	Tave = xbt_0p5m_bin['(C)'].where(xbt_0p5m_bin['Depth'] <= args.maxdepth).mean()
+	Tmid = xbt_0p5m_bin['(C)'].where(xbt_0p5m_bin['Depth'] <= args.maxdepth).median()
+	Tstd = xbt_0p5m_bin['(C)'].where(xbt_0p5m_bin['Depth'] <= args.maxdepth).std()
 
-	print("{file},{mean},{min},{max},{std}".format(file=args.filepath,mean=Tave,min=Tmin,max=Tmax,std=Tstd))
+	print("{file},{mean},{min},{max},{mid},{std}".format(file=args.filepath,mean=Tave,min=Tmin,max=Tmax,mid=Tmid,std=Tstd))
