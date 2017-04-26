@@ -159,7 +159,7 @@ if args.alamofloats and not (args.alamofloats_cycle[0] == args.alamofloats_cycle
 
 	fig = plt.figure(1, figsize=(figscale/3, 3), facecolor='w', edgecolor='w')
 	ax1 = fig.add_subplot(111)
-	plt.hold(True)
+	#plt.hold(True)
 
 	for cycle in range(startcycle,endcycle+1,1):
 		offset = cycle - startcycle
@@ -233,17 +233,19 @@ if args.contour_plot:
 	
 			xtime = np.ones_like(np.array(sorted(Profile.keys()))) * mpl.dates.date2num(temp_time)
 			#turn off below and set zorder to 1 for no scatter plot colored by points
-			plt.scatter(x=xtime, y=np.array(sorted(Profile.keys())),s=1,marker='.', edgecolors='none', c='k', zorder=3, alpha=0.3) 
+			plt.scatter(x=xtime, y=np.array(sorted(Profile.keys())),s=5,marker='.', edgecolors='none', c='k', zorder=3, alpha=1) 
 			
+			'''
 			plt.scatter(x=xtime, y=np.array(sorted(Profile.keys())),s=15,marker='.', edgecolors='none', c=Temperature, 
 			vmin=args.paramspan[0], vmax=args.paramspan[1], 
-			cmap=cmocean.cm.thermal, zorder=1)
+			cmap=cmocean.cm.thermal, zorder=3)
+			'''
 		except IndexError:
 			pass
 
 
-	cbar = plt.colorbar()
-	cbar.set_label('Temperature (C)',rotation=0, labelpad=90)
+	#cbar = plt.colorbar()
+	#cbar.set_label('Temperature (C)',rotation=0, labelpad=90)
 	plt.contourf(ProfileTime,depth_array,temparray.T, 
 		extend='both', cmap=cmocean.cm.thermal, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=1.0)
 
