@@ -41,13 +41,13 @@ parser.add_argument('-xbt','--xbt', action="store_true",
 	help='work with xbt data')
 parser.add_argument('-axctd','--axctd', action="store_true",
 	help='work with axctd data')
+parser.add_argument('-bd','--binned_data', action="store_true",
+	help='output binned profile data')
 parser.add_argument('--maxdepth', type=float, 
 	help="known bathymetric depth at location")
 
 
 args = parser.parse_args()
-
-#TODO: Duplicate code in xbt/axctd data can be combined to a more simpler routine
 
 #######
 # axctd
@@ -56,7 +56,9 @@ if args.axctd:
 	axctddata = pd.read_excel(args.filepath, sheetname=0)
 
 	bins = np.arange(0,args.maxdepth,0.5)
-	axctd_0p5m_bin = axctddata.groupby(np.digitize(axctddata.Depth,bins)).median()
+	axctd_0p5m_bin = axctddata.groupby(np.floor(axctddata.Depth *2) / 2).median()
+	#groupby makes index the wanted var to  sort by
+	axctd_0p5m_bin['Depth']=axctd_0p5m_bin.index
 
 	Tmax = axctd_0p5m_bin['Temp'].where(axctd_0p5m_bin['Depth'] <= args.maxdepth).max()
 	Tmin = axctd_0p5m_bin['Temp'].where(axctd_0p5m_bin['Depth'] <= args.maxdepth).min()
@@ -66,6 +68,8 @@ if args.axctd:
 
 	print("{file},{mean},{min},{max},{mid},{std}".format(file=args.filepath,mean=Tave,min=Tmin,max=Tmax,mid=Tmid,std=Tstd))
 
+	if args.binned_data:
+		axctd_0p5m_bin.where(axctd_0p5m_bin['Depth'] <= args.maxdepth)[['Depth','Temp','Salinity']].to_csv(args.filepath + '_0p5m_binned.csv', sep=',', encoding='utf-8',  index = False)
 #####
 # xbt
 #
@@ -73,7 +77,9 @@ if args.xbt:
 	xbtdata = pd.read_csv(args.filepath, delim_whitespace=True, skiprows=3, na_values='******')
 	
 	bins = np.arange(0,args.maxdepth,0.5)
-	xbt_0p5m_bin = xbtdata.groupby(np.digitize(xbtdata.Depth,bins)).median()
+	xbt_0p5m_bin = xbtdata.groupby(np.floor(xbtdata.Depth *2) / 2).median()
+	#groupby makes index the wanted var to  sort by
+	xbt_0p5m_bin['Depth']=xbt_0p5m_bin.index
 
 	Tmax = xbt_0p5m_bin['(C)'].where(xbt_0p5m_bin['Depth'] <= args.maxdepth).max()
 	Tmin = xbt_0p5m_bin['(C)'].where(xbt_0p5m_bin['Depth'] <= args.maxdepth).min()
@@ -82,3 +88,9 @@ if args.xbt:
 	Tstd = xbt_0p5m_bin['(C)'].where(xbt_0p5m_bin['Depth'] <= args.maxdepth).std()
 
 	print("{file},{mean},{min},{max},{mid},{std}".format(file=args.filepath,mean=Tave,min=Tmin,max=Tmax,mid=Tmid,std=Tstd))
+
+	if args.binned_data:
+		print("Saving file to {path}_0p5m_binned.csv".format(path=args.filepath))
+		xbt_0p5m_bin.where(xbt_0p5m_bin['Depth'] <= args.maxdepth)[['Depth','(C)']].to_csv(args.filepath + '_0p5m_binned.csv', sep=',', encoding='utf-8',  index=False)
+
+
