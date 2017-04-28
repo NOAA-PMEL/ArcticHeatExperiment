@@ -259,5 +259,6 @@ if args.contour_plot:
 	ax1.xaxis.set_tick_params(which='major', pad=25)
 
 	plt.tight_layout()
+	plt.savefig(args.filepath + '.svg', transparent=False, dpi = (300))
 	plt.savefig(args.filepath + '.png', transparent=False, dpi = (300))
 	plt.close()
