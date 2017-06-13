@@ -80,7 +80,7 @@ class MidpointNormalize(colors.Normalize):
 parser = argparse.ArgumentParser(description='ArcticHeat ctd datafile parser ')
 parser.add_argument('filepath', metavar='filepath', type=str,
 			   help='full path to file')
-parser.add_argument('--maxdepth', type=float, 
+parser.add_argument('--maxdepth', type=float, default=70, 
 	help="known bathymetric depth at location")
 parser.add_argument('--paramspan', nargs='+', type=float, 
 	help="max,min of parameter")
@@ -230,6 +230,7 @@ if args.contour_plot:
 			ProfileTime = ProfileTime + [temp_time]
 			Pressure = np.array(sorted(Profile.keys()))
 			Temperature = np.array([Profile[x]['Temperature'] for x in sorted(Profile.keys()) ])
+			#Temperature[Temperature<30.] = np.nan
 
 			temparray[cycle_col,:] = np.interp(depth_array,Pressure,Temperature,left=np.nan,right=np.nan)
 			cycle_col +=1
@@ -257,6 +258,7 @@ if args.contour_plot:
 	ax1.xaxis.set_minor_formatter(DateFormatter('%d'))
 	ax1.xaxis.set_major_formatter(DateFormatter('%b %y'))
 	ax1.xaxis.set_tick_params(which='major', pad=25)
+	ax1.set_xlim([datetime.datetime(2016,06,05),datetime.datetime(2016,06,25)])
 
 	plt.tight_layout()
 	plt.savefig(args.filepath + '.svg', transparent=False, dpi = (300))
