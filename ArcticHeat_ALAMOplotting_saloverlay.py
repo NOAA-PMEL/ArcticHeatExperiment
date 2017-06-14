@@ -216,6 +216,7 @@ if args.contour_plot:
 	depth_array = np.arange(0,args.maxdepth+1,0.5) 
 	num_cycles = EcoFOCI_db.count(table=args.alamofloats, start=startcycle, end=endcycle)
 	temparray = np.ones((num_cycles,len(depth_array)))*np.nan
+	salarray = np.ones((num_cycles,len(depth_array)))*np.nan
 	ProfileTime = []
 	cycle_col=0
 
@@ -230,9 +231,11 @@ if args.contour_plot:
 			ProfileTime = ProfileTime + [temp_time]
 			Pressure = np.array(sorted(Profile.keys()))
 			Temperature = np.array([Profile[x]['Temperature'] for x in sorted(Profile.keys()) ])
-			#Temperature[Temperature<30.] = np.nan
+			Salinity = np.array([Profile[x]['PSAL'] for x in sorted(Profile.keys()) ])
+			Salinity[Salinity<30.] = np.nan
 
 			temparray[cycle_col,:] = np.interp(depth_array,Pressure,Temperature,left=np.nan,right=np.nan)
+			salarray[cycle_col,:] = np.interp(depth_array,Pressure,Salinity,left=np.nan,right=np.nan)
 			cycle_col +=1
 	
 			xtime = np.ones_like(np.array(sorted(Profile.keys()))) * mpl.dates.date2num(temp_time)
@@ -250,6 +253,8 @@ if args.contour_plot:
 	#cbar.set_label('Temperature (C)',rotation=0, labelpad=90)
 	plt.contourf(ProfileTime,depth_array,temparray.T, 
 		extend='both', cmap=cmocean.cm.thermal, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=1.0)
+	CS=plt.contour(ProfileTime,depth_array,salarray.T,[31.5,32,32.5,33,33.5,34],linewidths=0.5,colors='#00FF00')
+	plt.clabel(CS, inline=1, fontsize=4, fmt='%1.1f')
 
 	ax1.invert_yaxis()
 	ax1.xaxis.set_major_locator(DayLocator(bymonthday=15))
@@ -258,7 +263,7 @@ if args.contour_plot:
 	ax1.xaxis.set_minor_formatter(DateFormatter('%d'))
 	ax1.xaxis.set_major_formatter(DateFormatter('%b %y'))
 	ax1.xaxis.set_tick_params(which='major', pad=25)
-	#ax1.set_xlim([datetime.datetime(2016,06,05),datetime.datetime(2016,06,25)])
+	ax1.set_xlim([datetime.datetime(2016,06,05),datetime.datetime(2016,06,25)])
 
 	plt.tight_layout()
 	plt.savefig(args.filepath + '.svg', transparent=False, dpi = (300))
