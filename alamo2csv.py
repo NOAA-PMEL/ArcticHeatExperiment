@@ -49,7 +49,7 @@ __keywords__ = 'netCDF','meta','header', 'csv'
 def etopo1_subset(file='etopo1.nc', region=None):
     """ read in ardemV2 topography/bathymetry. """
     
-    file='/Volumes/WDC_internal/Users/bell/in_and_outbox/MapGrids/etopo_subsets/etopo1_chukchi.nc'
+    file='/Volumes/WDC_internal/Users/bell/in_and_outbox/Ongoing_Analysis/MapGrids/etopo_subsets/etopo1_chukchi.nc'
     bathydata = Dataset(file)
     
     topoin = bathydata.variables['Band1'][:]
@@ -104,8 +104,8 @@ parser.add_argument("-plts_out","--plots_out", action="store_true",
 args = parser.parse_args()
 
 path = '/Volumes/WDC_internal/Users/bell/ecoraid/2016/Additional_FieldData/ArcticHeat/AlamoFloats/netcdf/'
-infile = ['arctic_heat_alamo_profiles_9076_8a66_41a1_a1fa.nc',
-    'arctic_heat_alamo_profiles_9085_23b3_8ba3_1def.nc']
+infile = ['arctic_heat_alamo_profiles_9058_9f75_d5e5_f5f9.nc',
+            'arctic_heat_alamo_profiles_9115_bb97_cc7e_a9c0.nc']
 
 ###nc readin/out
 df = EcoFOCI_netCDF(path+infile[0])
@@ -139,7 +139,14 @@ if args.csv_out:
 #--
 
 if args.plots_out:
-    doy_plt = True
+    doy_plt = False
+    if doy_plt:
+        dtime = num2date(data0['time'],'seconds since 1970-01-01')
+        doy0 = [x.timetuple().tm_yday for x in dtime]
+        dtime = num2date(data1['time'],'seconds since 1970-01-01')
+        doy1 = [x.timetuple().tm_yday for x in dtime]
+
+    mono_col_plt = True
     if doy_plt:
         dtime = num2date(data0['time'],'seconds since 1970-01-01')
         doy0 = [x.timetuple().tm_yday for x in dtime]
@@ -192,13 +199,17 @@ if args.plots_out:
     x1 = np.ceil((data0['longitude'].min()-5))
     x2 = np.floor((data0['longitude'].max()+5))
     print y1,y2,x1,x2
+    y1=64.0
+    y2=76.0
+    x1=-173.0
+    x2=-137.0
 
 
     fig = plt.figure()
     ax = plt.subplot(111)
             
-    m = Basemap(resolution='i',projection='merc', llcrnrlat=y1, \
-                urcrnrlat=y2,llcrnrlon=x1,urcrnrlon=x2,\
+    m = Basemap(resolution='i',projection='merc', llcrnrlat=66, \
+                urcrnrlat=74,llcrnrlon=-170,urcrnrlon=-150,\
                 lat_ts=45)
 
     elons, elats = np.meshgrid(elons, elats)
@@ -214,6 +225,9 @@ if args.plots_out:
         xd1,yd1 = m(lon_data1,lat_data1)
     if plot_moorings:
         mx, my = m(mlon, mlat)
+    if mono_col_plt:
+        xd0,yd0 = m(data0['longitude'],data0['latitude'])
+        xd1,yd1 = m(data1['longitude'],data1['latitude'])
 
     #CS = m.imshow(topoin, cmap='Greys_r') #
     CS_l = m.contour(ex,ey,topoin, levels=etopo_levels, linestyle='--', linewidths=0.2, colors='black', alpha=.75) 
@@ -235,6 +249,9 @@ if args.plots_out:
         m.scatter(xd1,yd1,100,marker='.', edgecolors='none', c=temp_data1, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
         c = plt.colorbar()
         c.set_label("~BTM Temperature")
+    if mono_col_plt:
+        m.scatter(xd0,yd0,50,marker='.', edgecolors='none', c='#004499')
+        m.scatter(xd1,yd1,50,marker='.', edgecolors='none', c='#299387')
 
 
     m.plot(xd0[0],yd0[0], '+', markersize=10, color='k')

@@ -10,7 +10,7 @@ Takes parsed aircraft data and plots it
 import datetime
 import pandas as pd
 import argparse
-import pygeoj
+#import pygeoj
 
 #Science Stack
 from netCDF4 import Dataset, date2num, num2date
@@ -165,7 +165,7 @@ elif maptype == 'basemap':
 
     m.scatter(xd0,yd0,5,marker='.', edgecolors='none', color='black',zorder=2)
     data['sst'][data['alt'] > args.maxalt] = np.nan
-    m.scatter(xd0,yd0,25,marker='.', edgecolors='none', c=data['sst'].values, vmin=-4, vmax=10, cmap=cmocean.cm.thermal, zorder=2)
+    m.scatter(xd0,yd0,25,marker='.', edgecolors='none', c=data['sst'].values, vmin=-2, vmax=7, cmap=cmocean.cm.thermal, zorder=2)
     c = plt.colorbar()
     c.set_label("Rad SST / Flight Path")
 
@@ -177,13 +177,13 @@ elif maptype == 'basemap':
         """
         ind =xbt[xbt['Thermocline']==0].index.tolist()
         xd1,yd1=m(xbt.Longitude[ind].values,xbt.Latitude[ind].values)
-        m.scatter(xd1,yd1,50,marker='o', facecolors='none', edgecolors='k')
+        m.scatter(xd1,yd1,25,marker='o', facecolors='k', edgecolors='k')
         ind =xbt[xbt['Thermocline']==1].index.tolist()
         xd1,yd1=m(xbt.Longitude[ind].values,xbt.Latitude[ind].values)
-        m.scatter(xd1,yd1,50,marker='o', facecolors='k', edgecolors='k')
+        m.scatter(xd1,yd1,25,marker='o', facecolors='k', edgecolors='k')
         ind =xbt[xbt['Thermocline']==-99].index.tolist()
         xd1,yd1=m(xbt.Longitude[ind].values,xbt.Latitude[ind].values)
-        m.scatter(xd1,yd1,50,marker='x', facecolors='k', edgecolors='k', zorder=2)
+        m.scatter(xd1,yd1,25,marker='o', facecolors='k', edgecolors='k')
 
     #m.drawcountries(linewidth=0.5)
     m.drawcoastlines(linewidth=0.5)
