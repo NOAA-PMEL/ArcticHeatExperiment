@@ -96,61 +96,87 @@ def find_nearest(a, a0):
 """---------------------------------- Main --------------------------------------------"""
 
 parser = argparse.ArgumentParser(description='Convert .nc to .csv screen output')
-#parser.add_argument('infile', metavar='infile', type=str, help='input file path')
-parser.add_argument("-csv_out","--csv_out", action="store_true",
+parser.add_argument('infile', metavar='infile', type=str, help='input file path')
+parser.add_argument("-csv","--csv", action="store_true",
         help='output non-epic formatted netcdf as csv')
-parser.add_argument("-plts_out","--plots_out", action="store_true",
+parser.add_argument("-is_whoi","--is_whoi", action="store_true",
+        help='flag if is directly from WHOI')
+parser.add_argument("-plots","--plots", action="store_true",
         help='generate plots')
 args = parser.parse_args()
 
-path = '/Volumes/WDC_internal/Users/bell/ecoraid/2016/Additional_FieldData/ArcticHeat/AlamoFloats/netcdf/'
-infile = ['arctic_heat_alamo_profiles_9058_9f75_d5e5_f5f9.nc',
-            'arctic_heat_alamo_profiles_9115_bb97_cc7e_a9c0.nc']
 
 ###nc readin/out
-df = EcoFOCI_netCDF(path+infile[0])
+df = EcoFOCI_netCDF(args.infile)
 global_atts = df.get_global_atts()
 vars_dic = df.get_vars()
+dims = df.get_dims()
 data0 = df.ncreadfile_dic()
 df.close()
 
-df = EcoFOCI_netCDF(path+infile[1])
+df = EcoFOCI_netCDF(args.infile)
 global_atts = df.get_global_atts()
 vars_dic = df.get_vars()
+dims = df.get_dims()
 data1 = df.ncreadfile_dic()
+
+if args.is_whoi:
+    timestr = 'days since 1950-01-01T00:00:00Z'
+else:
+    timestr = 'seconds since 1970-01-01'
+
+skipped_vars = ['STATION_PARAMETERS','FLOAT_SERIAL_NO',
+                'REFERENCE_DATE_TIME','time', 'profileid',
+                'PLATFORM_NUMBER','JULD','JULD_LOCATION']
+
+if args.csv:
+    if args.is_whoi:
+
+        line = 'time, CycleNumber'
+        for k in vars_dic.keys():
+            if k in ['PRES','TEMP','PSAL']:
+                line = line + ', ' + str(k)
+        print line
+
+        for j in range(0,dims['N_LEVELS'].size):
+            line = num2date(data1['JULD'][0],timestr).strftime('%Y-%m-%d %H:%M:%S')
+            line = line + ', ' + str(data1['CYCLE_NUMBER'][0])
+            for k in vars_dic.keys():
+                if k in ['PRES','TEMP','PSAL']:
+                    line = line + ', ' + str(data1[k][0][j])
+            print line
+    else:
+        line = 'time'
+        for k in vars_dic.keys():
+            if k not in ['FLOAT_SERIAL_NO','REFERENCE_DATE_TIME','time', 'profileid']:
+                line = line + ', ' + str(k)
+        print line
+
+        for i, val in enumerate(data1['time']):
+            line = num2date(val,timestr).strftime('%Y-%m-%d %H:%M:%S')
+            for k in vars_dic.keys():
+                if k not in ['FLOAT_SERIAL_NO','REFERENCE_DATE_TIME','time', 'profileid']:
+                    line = line + ', ' + str(data1[k][i])
+            print line
+
+
 df.close()
-
-
-if args.csv_out:
-
-	line = 'time'
-	for k in vars_dic.keys():
-		if k not in ['FLOAT_SERIAL_NO','REFERENCE_DATE_TIME','time', 'profileid']:
-			line = line + ', ' + str(k)
-	print line
-
-	for i, val in enumerate(data1['time']):
-		line = num2date(val,'seconds since 1970-01-01').strftime('%Y-%m-%d %H:%M:%S')
-		for k in vars_dic.keys():
-			if k not in ['FLOAT_SERIAL_NO','REFERENCE_DATE_TIME','time', 'profileid']:
-				line = line + ', ' + str(data1[k][i])
-		print line
 
 #--
 
-if args.plots_out:
+if args.plots:
     doy_plt = False
     if doy_plt:
-        dtime = num2date(data0['time'],'seconds since 1970-01-01')
+        dtime = num2date(data0['time'],timestr)
         doy0 = [x.timetuple().tm_yday for x in dtime]
-        dtime = num2date(data1['time'],'seconds since 1970-01-01')
+        dtime = num2date(data1['time'],timestr)
         doy1 = [x.timetuple().tm_yday for x in dtime]
 
     mono_col_plt = True
     if doy_plt:
-        dtime = num2date(data0['time'],'seconds since 1970-01-01')
+        dtime = num2date(data0['time'],timestr)
         doy0 = [x.timetuple().tm_yday for x in dtime]
-        dtime = num2date(data1['time'],'seconds since 1970-01-01')
+        dtime = num2date(data1['time'],timestr)
         doy1 = [x.timetuple().tm_yday for x in dtime]
 
 

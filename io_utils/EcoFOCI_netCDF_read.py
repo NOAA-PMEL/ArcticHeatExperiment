@@ -44,6 +44,10 @@ class EcoFOCI_netCDF(object):
         """set global attribute for specified name"""
         self.nchandle.setncattr(name,attribute)
 
+    def get_dims(self):
+        self.dimensions = self.nchandle.dimensions
+        return self.dimensions
+        
     def get_vars(self):
         self.variables = self.nchandle.variables
         return self.variables

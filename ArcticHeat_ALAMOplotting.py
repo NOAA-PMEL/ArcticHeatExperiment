@@ -219,7 +219,7 @@ if args.contour_plot:
 	ProfileTime = []
 	cycle_col=0
 
-	fig = plt.figure(1, figsize=(12, 3), facecolor='w', edgecolor='w')
+	fig = plt.figure(1, figsize=(12, 6), facecolor='w', edgecolor='w')
 	ax1 = fig.add_subplot(111)		
 	for cycle in range(startcycle,endcycle+1,1):
 		#get db meta information for mooring
@@ -253,7 +253,7 @@ if args.contour_plot:
 
 	ax1.invert_yaxis()
 	ax1.xaxis.set_major_locator(DayLocator(bymonthday=15))
-	ax1.xaxis.set_minor_locator(DayLocator(bymonthday=[5,10,15,20,25,30]))
+	ax1.xaxis.set_minor_locator(DayLocator(bymonthday=range(1,33,2)))
 	ax1.xaxis.set_major_formatter(ticker.NullFormatter())
 	ax1.xaxis.set_minor_formatter(DateFormatter('%d'))
 	ax1.xaxis.set_major_formatter(DateFormatter('%b %y'))
