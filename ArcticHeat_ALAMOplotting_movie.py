@@ -4,7 +4,7 @@
 
  Background:
  --------
- ArcticHeat_ALAMOplotting.py
+ ArcticHeat_ALAMOplotting_movie.py
  
  Purpose:
  --------
@@ -92,114 +92,13 @@ parser.add_argument('-plot_cbz','--plot_cb_zero', type=float,
 	help='Colorbar inflection value for divergent color scheme')
 parser.add_argument('-c','--contour_plot', action="store_true",
 	help='create a contour plot')
+parser.add_argument('-cd','--cd', type=int, nargs=9,
+	help='contour delay, contourfill delay, cf alpha .75 delay, cf alpha .5, cf alpha .25 ')
 args = parser.parse_args()
 
 #####
 # alamo floats
 #
-if args.alamofloats and (args.alamofloats_cycle[0] ==args.alamofloats_cycle[1] ) and not args.contour_plot:
-
-	startcycle=args.alamofloats_cycle[0]
-	endcycle=args.alamofloats_cycle[1]
-
-	#get information from local config file - a json formatted file
-	config_file = 'EcoFOCI_config/db_config/db_config_alamofloats.pyini'
-
-
-	EcoFOCI_db = EcoFOCI_db_ALAMO()
-	(db,cursor) = EcoFOCI_db.connect_to_DB(db_config_file=config_file)
-
-	#get db meta information for mooring
-	table = '9085'
-	Profile = EcoFOCI_db.read_profile(table=table, CycleNumber=startcycle, verbose=True)
-	EcoFOCI_db.close()
-
-	Pressure = np.array(sorted(Profile.keys()))
-	Temperature = np.array([Profile[x]['Temperature'] for x in sorted(Profile.keys()) ])
-
-	figscale = 3.
-
-	fig = plt.figure(1, figsize=(1, 3), facecolor='w', edgecolor='w')
-	ax1 = fig.add_subplot(111)
-	p1 = ax1.scatter(Temperature,Pressure,8,marker='.', edgecolors='none', c=Temperature, 
-		norm=MidpointNormalize(midpoint=0.),
-		vmin=args.paramspan[0], vmax=args.paramspan[1], 
-		cmap='seismic')
-
-	p1 = ax1.plot(np.zeros_like(Pressure),Pressure,'grey',linewidth=.15)
-	ax1.set_yticks(np.arange(0.,args.maxdepth + 25.,10.))
-
-	if args.maxdepth:
-		ax1.set_ylim([0,args.maxdepth])
-
-	if args.paramspan:
-		ax1.set_xlim([args.paramspan[0],args.paramspan[1]])
-
-	ax1.invert_yaxis()
-
-	fmt=mpl.ticker.ScalarFormatter(useOffset=False)
-	fmt.set_scientific(False)
-	ax1.xaxis.set_major_formatter(fmt)
-	ax1.tick_params(axis='both', which='major', bottom='off', top='off',labelbottom='off')
-	ax1.yaxis.set_ticklabels([])
-	plt.tight_layout()
-	plt.savefig(args.filepath + '.png', transparent=True, dpi = (150))
-	plt.close()
-
-if args.alamofloats and not (args.alamofloats_cycle[0] == args.alamofloats_cycle[1] ) and not args.contour_plot:
-
-	startcycle=args.alamofloats_cycle[0]
-	endcycle=args.alamofloats_cycle[1]
-
-	#get information from local config file - a json formatted file
-	config_file = 'EcoFOCI_config/db_config/db_config_alamofloats.pyini'
-
-
-	EcoFOCI_db = EcoFOCI_db_ALAMO()
-	(db,cursor) = EcoFOCI_db.connect_to_DB(db_config_file=config_file)
-
-	figscale = endcycle-startcycle
-
-	fig = plt.figure(1, figsize=(figscale/3, 3), facecolor='w', edgecolor='w')
-	ax1 = fig.add_subplot(111)
-	#plt.hold(True)
-
-	for cycle in range(startcycle,endcycle+1,1):
-		offset = cycle - startcycle
-		#get db meta information for mooring
-		table = args.alamofloats
-		Profile = EcoFOCI_db.read_profile(table=table, CycleNumber=cycle, verbose=True)
-
-		Pressure = np.array(sorted(Profile.keys()))
-		Temperature = np.array([Profile[x]['Temperature'] for x in sorted(Profile.keys()) ])
-
-
-		p1 = ax1.scatter(Temperature+1*offset,Pressure,45,marker='.', edgecolors='none', c=Temperature, 
-			norm=MidpointNormalize(midpoint=args.plot_cb_zero),
-			vmin=args.paramspan[0], vmax=args.paramspan[1], 
-			cmap=cmocean.cm.thermal)#seismic or RdBu_r
-
-	#p1 = ax1.plot(np.zeros_like(Pressure),Pressure,'grey',linewidth=.15)
-	#ax1.set_yticks(np.arange(0.,args.maxdepth + 25.,10.))
-
-	if args.maxdepth:
-		ax1.set_ylim([0,args.maxdepth])
-
-	ax1.set_xlim([args.paramspan[0],args.paramspan[1]+1*figscale+1])
-
-	plt.colorbar(p1)
-	ax1.invert_yaxis()
-
-	fmt=mpl.ticker.ScalarFormatter(useOffset=False)
-	fmt.set_scientific(False)
-	ax1.xaxis.set_major_formatter(fmt)
-	ax1.tick_params(axis='both', which='major', bottom='off', top='off',labelbottom='off')
-	#ax1.yaxis.set_ticklabels([])
-	plt.tight_layout()
-	plt.savefig(args.filepath + '.png', transparent=False, dpi = (300))
-	plt.close()
-
-	EcoFOCI_db.close()
 
 if args.contour_plot:
 
@@ -248,8 +147,26 @@ if args.contour_plot:
 
 	#cbar = plt.colorbar()
 	#cbar.set_label('Temperature (C)',rotation=0, labelpad=90)
-	plt.contourf(ProfileTime,depth_array,temparray.T, 
-		extend='both', cmap=cmocean.cm.thermal, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=1.0)
+	if args.cd[0] == 1:
+		pass
+	elif args.cd[0] == 0:
+		plt.contour(ProfileTime,depth_array,temparray.T, 
+			extend='both', colors='k', linewidths =0.5, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=1.0, zorder=1)
+	else:
+		plt.contour(ProfileTime[:args.cd[0]],depth_array,temparray.T[:,:args.cd[0]], 
+			extend='both', colors='k', linewidths =0.5, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=1.0, zorder=1)
+
+	for grad in range(1,9):
+		blend = 1.0 - (0.125 * (grad-1))
+		if args.cd[grad] == 1:
+			pass
+		elif args.cd[grad] == 0:
+			plt.contourf(ProfileTime,depth_array,temparray.T, 
+				extend='both', cmap=cmocean.cm.thermal, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=blend)
+		else:
+			plt.contourf(ProfileTime[:args.cd[grad]],depth_array,temparray.T[:,:args.cd[grad]], 
+				extend='both', cmap=cmocean.cm.thermal, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=blend)
+
 
 	ax1.invert_yaxis()
 	ax1.xaxis.set_major_locator(DayLocator(bymonthday=15))
@@ -259,7 +176,7 @@ if args.contour_plot:
 	ax1.xaxis.set_major_formatter(DateFormatter('%b %y'))
 	ax1.xaxis.set_tick_params(which='major', pad=25)
 	ax1.set_xlim([datetime.datetime(2016,06,05),datetime.datetime(2016,07,01)])
-
+	ax1.set_ylim([args.maxdepth,0])
 	plt.tight_layout()
 	#plt.savefig(args.filepath + '.svg', transparent=False, dpi = (300))
 	plt.savefig(args.filepath + '.png', transparent=False, dpi = (300))
