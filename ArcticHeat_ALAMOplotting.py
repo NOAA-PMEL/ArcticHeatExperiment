@@ -258,7 +258,7 @@ if args.contour_plot:
 	ax1.xaxis.set_minor_formatter(DateFormatter('%d'))
 	ax1.xaxis.set_major_formatter(DateFormatter('%b %y'))
 	ax1.xaxis.set_tick_params(which='major', pad=25)
-	ax1.set_xlim([datetime.datetime(2016,06,05),datetime.datetime(2016,07,01)])
+	#ax1.set_xlim([datetime.datetime(2016,06,05),datetime.datetime(2016,07,01)])
 
 	plt.tight_layout()
 	#plt.savefig(args.filepath + '.svg', transparent=False, dpi = (300))
