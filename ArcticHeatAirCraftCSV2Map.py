@@ -21,9 +21,9 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from matplotlib.mlab import bivariate_normal
 import matplotlib.ticker as ticker
-import cartopy.feature as cfeature
-import cartopy.crs as ccrs
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+#import cartopy.feature as cfeature
+#import cartopy.crs as ccrs
+#from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from mpl_toolkits.basemap import Basemap, shiftgrid
 import cmocean
 
@@ -71,11 +71,12 @@ parser = argparse.ArgumentParser(description='Map')
 parser.add_argument('sourcedir', metavar='sourcedir', type=str, help='full path to file')
 parser.add_argument('mapdir', metavar='mapdir', type=str, help='full path to file')
 parser.add_argument('maxalt', metavar='maxalt', type=float, help='altitude above which data is ignored')
+parser.add_argument('maxroll', metavar='maxroll', type=float, help='roll above which data is ignored')
 parser.add_argument('--xbt', type=str, help='optional full path to excel file')
 args = parser.parse_args()
 
 ## read data in
-data = pd.read_csv(args.sourcedir,names=['lon','lat','alt','sst','pyro'],header=0)
+data = pd.read_csv(args.sourcedir,names=['lon','lat','alt','sst','pyro','roll'],header=0)
 
 if args.xbt:
     xbt = pd.read_excel(args.xbt,header=0)
@@ -150,7 +151,7 @@ elif maptype == 'basemap':
                 urcrnrlat=y2,llcrnrlon=x1,urcrnrlon=x2,\
                 lat_ts=45)
     """
-    m = Basemap(resolution='i',projection='merc', llcrnrlat=66, \
+    m = Basemap(resolution='i',projection='merc', llcrnrlat=60, \
                 urcrnrlat=74,llcrnrlon=-170,urcrnrlon=-150,\
                 lat_ts=45)
 
@@ -165,7 +166,9 @@ elif maptype == 'basemap':
 
     m.scatter(xd0,yd0,5,marker='.', edgecolors='none', color='black',zorder=2)
     data['sst'][data['alt'] > args.maxalt] = np.nan
-    m.scatter(xd0,yd0,25,marker='.', edgecolors='none', c=data['sst'].values, vmin=-2, vmax=7, cmap=cmocean.cm.thermal, zorder=2)
+    data['sst'][data['roll'] > args.maxalt] = np.nan
+    data['sst'][data['roll'] < -1.0*args.maxalt] = np.nan
+    m.scatter(xd0,yd0,25,marker='.', edgecolors='none', c=data['sst'].values, vmin=-2, vmax=10, cmap=cmocean.cm.thermal, zorder=2)
     c = plt.colorbar()
     c.set_label("Rad SST / Flight Path")
 

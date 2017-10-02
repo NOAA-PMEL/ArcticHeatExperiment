@@ -121,6 +121,9 @@ if args.csv:
 
 	if args.rows:
 		for j in result.keys():
-			time_temp = (datetime.datetime.strptime(result[j]['TIME'], '%Y%m%dT%H%M%S')).strftime('%Y-%m-%d %H:%M:%S')
-			geo_json = '''{0},{1},{2},{3},{4},{5} '''.format(time_temp,result[j]['LON'],result[j]['LAT'],result[j]['ALTGPS'],result[j]['SST'],result[j]['PYRAUCLEAR'])
-			print geo_json
+			try:
+				time_temp = (datetime.datetime.strptime(result[j]['TIME'], '%Y%m%dT%H%M%S')).strftime('%Y-%m-%d %H:%M:%S')
+				geo_json = '''{0},{1},{2},{3},{4},{5},{6} '''.format(time_temp,result[j]['LON'],result[j]['LAT'],result[j]['ALTGPS'],result[j]['SST'],result[j]['PYRAUCLEAR'],result[j]['ROLL'])
+				print geo_json
+			except KeyError:
+				print result[j]
