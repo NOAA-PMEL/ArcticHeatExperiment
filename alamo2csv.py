@@ -34,6 +34,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import cmocean
 
+#%%
 #User Stack
 from io_utils.EcoFOCI_netCDF_read import EcoFOCI_netCDF
 
@@ -49,7 +50,7 @@ __keywords__ = 'netCDF','meta','header', 'csv'
 def etopo1_subset(file='etopo1.nc', region=None):
     """ read in ardemV2 topography/bathymetry. """
     
-    file='/Volumes/WDC_internal/Users/bell/in_and_outbox/Ongoing_Analysis/MapGrids/etopo_subsets/etopo1_chukchi.nc'
+    file='/Users/bell/in_and_outbox/Ongoing_Analysis/MapGrids/etopo_subsets/etopo1_chukchi.nc'
     bathydata = Dataset(file)
     
     topoin = bathydata.variables['Band1'][:]
@@ -107,14 +108,16 @@ args = parser.parse_args()
 
 
 ###nc readin/out
-df = EcoFOCI_netCDF(args.infile)
+file1 = '/Users/bell/ecoraid/2016/Additional_FieldData/ArcticHeat/AlamoFloats/netcdf/arctic_heat_alamo_profiles_9076_8a66_41a1_a1fa.nc'
+df = EcoFOCI_netCDF(file1)
 global_atts = df.get_global_atts()
 vars_dic = df.get_vars()
 dims = df.get_dims()
 data0 = df.ncreadfile_dic()
 df.close()
 
-df = EcoFOCI_netCDF(args.infile)
+file2 = '/Users/bell/ecoraid/2016/Additional_FieldData/ArcticHeat/AlamoFloats/netcdf/arctic_heat_alamo_profiles_9085_14c8_d35b_bea4.nc'
+df = EcoFOCI_netCDF(file2)
 global_atts = df.get_global_atts()
 vars_dic = df.get_vars()
 dims = df.get_dims()
@@ -206,6 +209,19 @@ if args.plots:
             lat_data1 = lat_data1 + [min(data1['latitude'][data1['CYCLE_NUMBER'] == ind])]
             lon_data1 = lon_data1 + [min(data1['longitude'][data1['CYCLE_NUMBER'] == ind])]
 
+    ave_tmp_plt = False
+    if ave_tmp_plt:
+        temp_data0,lat_data0, lon_data0 = [],[],[]
+        for ind in list(set(data0['CYCLE_NUMBER'])):
+            temp_data0 = temp_data0 + [np.mean(data0['TEMP'][np.where((data0['PRES'][data0['CYCLE_NUMBER'] == ind] > 0.5) & (data0['PRES'][data0['CYCLE_NUMBER'] == ind] <= 35))])]
+            lat_data0 = lat_data0 + [min(data0['latitude'][data0['CYCLE_NUMBER'] == ind])]
+            lon_data0 = lon_data0 + [min(data0['longitude'][data0['CYCLE_NUMBER'] == ind])]
+        temp_data1,lat_data1, lon_data1 = [],[],[]
+        for ind in list(set(data1['CYCLE_NUMBER'])):
+            temp_data1 = temp_data1 + [np.mean(data1['TEMP'][np.where((data1['PRES'][data1['CYCLE_NUMBER'] == ind] > 0.5) & (data1['PRES'][data1['CYCLE_NUMBER'] == ind] <= 35))])]
+            lat_data1 = lat_data1 + [min(data1['latitude'][data1['CYCLE_NUMBER'] == ind])]
+            lon_data1 = lon_data1 + [min(data1['longitude'][data1['CYCLE_NUMBER'] == ind])]
+
     plot_moorings = False
     if plot_moorings:
         #2015
@@ -249,10 +265,15 @@ if args.plots:
     if btm_tmp_plt:
         xd0,yd0 = m(lon_data0,lat_data0)
         xd1,yd1 = m(lon_data1,lat_data1)
+    if ave_tmp_plt:
+        xd0,yd0 = m(lon_data0,lat_data0)
+        xd1,yd1 = m(lon_data1,lat_data1)
     if plot_moorings:
         mx, my = m(mlon, mlat)
     if mono_col_plt:
         xd0,yd0 = m(data0['longitude'],data0['latitude'])
+        #manually add another point
+        xd0,yd0 = m(np.hstack([data0['longitude'],[-156.6]]),np.hstack([data0['latitude'],[71.6]]))
         xd1,yd1 = m(data1['longitude'],data1['latitude'])
 
     #CS = m.imshow(topoin, cmap='Greys_r') #
@@ -271,6 +292,11 @@ if args.plots:
         c = plt.colorbar()
         c.set_label("~SFC Temperature")
     if btm_tmp_plt:
+        m.scatter(xd0,yd0,100,marker='.', edgecolors='none', c=temp_data0, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+        m.scatter(xd1,yd1,100,marker='.', edgecolors='none', c=temp_data1, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
+        c = plt.colorbar()
+        c.set_label("~BTM Temperature")
+    if ave_tmp_plt:
         m.scatter(xd0,yd0,100,marker='.', edgecolors='none', c=temp_data0, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
         m.scatter(xd1,yd1,100,marker='.', edgecolors='none', c=temp_data1, vmin=-4, vmax=10, cmap=cmocean.cm.thermal)
         c = plt.colorbar()
