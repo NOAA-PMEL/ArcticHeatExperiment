@@ -41,24 +41,28 @@ __version__  = "0.1.0"
 __status__   = "Development"
 __keywords__ = 'arctic heat','ctd','FOCI', 'wood', 'kevin', 'alamo'
 
+### Plot settings
 mpl.rcParams['axes.grid'] = False
 mpl.rcParams['axes.edgecolor'] = 'white'
 mpl.rcParams['axes.linewidth'] = 0.25
 mpl.rcParams['grid.linestyle'] = '--'
 mpl.rcParams['grid.linestyle'] = '--'
-mpl.rcParams['xtick.major.size'] = 2
-mpl.rcParams['xtick.minor.size'] = 1
-mpl.rcParams['xtick.major.width'] = 0.25
-mpl.rcParams['xtick.minor.width'] = 0.25
-mpl.rcParams['ytick.major.size'] = 2
-mpl.rcParams['ytick.minor.size'] = 1
-mpl.rcParams['xtick.major.width'] = 0.25
-mpl.rcParams['xtick.minor.width'] = 0.25
+mpl.rcParams['xtick.major.size'] = 4
+mpl.rcParams['xtick.minor.size'] = 2
+mpl.rcParams['xtick.major.width'] = 2
+mpl.rcParams['xtick.minor.width'] = 1
+mpl.rcParams['ytick.major.size'] = 6
+mpl.rcParams['ytick.minor.size'] = 2
+mpl.rcParams['ytick.major.width'] = 2
+mpl.rcParams['ytick.minor.width'] = 1
 mpl.rcParams['ytick.direction'] = 'out'
 mpl.rcParams['xtick.direction'] = 'out'
-mpl.rcParams['ytick.color'] = 'grey'
-mpl.rcParams['xtick.color'] = 'grey'
-mpl.rcParams['font.family'] = 'Arial'
+mpl.rcParams['ytick.color'] = 'k'
+mpl.rcParams['xtick.color'] = 'k'
+mpl.rcParams['font.size'] = 24
+mpl.rcParams['font.sans-serif'] = "Arial"
+mpl.rcParams['font.family'] = "sans-serif"
+mpl.rcParams['font.weight'] = 'medium'
 mpl.rcParams['svg.fonttype'] = 'none'
 
 # Example of making your own norm.  Also see matplotlib.colors.
@@ -220,7 +224,7 @@ if args.contour_plot:
 	ProfileTime = []
 	cycle_col=0
 
-	fig = plt.figure(1, figsize=(12, 3), facecolor='w', edgecolor='w')
+	fig = plt.figure(1, figsize=(18,6), facecolor='w', edgecolor='w')
 	ax1 = fig.add_subplot(111)		
 	for cycle in range(startcycle,endcycle+1,1):
 		#get db meta information for mooring
@@ -240,11 +244,11 @@ if args.contour_plot:
 	
 			xtime = np.ones_like(np.array(sorted(Profile.keys()))) * mpl.dates.date2num(temp_time)
 			#turn off below and set zorder to 1 for no scatter plot colored by points
-			plt.scatter(x=xtime, y=np.array(sorted(Profile.keys())),s=1,marker='.', edgecolors='none', c='k', zorder=3, alpha=1) 
+			#plt.scatter(x=xtime, y=np.array(sorted(Profile.keys())),s=1,marker='.', edgecolors='none', c='k', zorder=3, alpha=1) 
 			
-			plt.scatter(x=xtime, y=np.array(sorted(Profile.keys())),s=15,marker='.', edgecolors='none', c=Temperature, 
+			plt.scatter(x=xtime, y=np.array(sorted(Profile.keys())),s=45,marker='.', edgecolors='none', c=Temperature, 
 			vmin=args.paramspan[0], vmax=args.paramspan[1], 
-			cmap=cmocean.cm.thermal, zorder=1)
+			cmap=cmocean.cm.thermal, zorder=2)
 		except IndexError:
 			pass
 
@@ -252,18 +256,21 @@ if args.contour_plot:
 	#cbar = plt.colorbar()
 	#cbar.set_label('Temperature (C)',rotation=0, labelpad=90)
 	plt.contourf(ProfileTime,depth_array,temparray.T, 
-		extend='both', cmap=cmocean.cm.thermal, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=1.0)
-	CS=plt.contour(ProfileTime,depth_array,salarray.T,[31.5,32,32.5,33,33.5,34],linewidths=0.5,colors='#00FF00')
-	plt.clabel(CS, inline=1, fontsize=4, fmt='%1.1f')
+		extend='both', cmap=cmocean.cm.thermal, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=1.0, zorder=1)
+	plt.contour(ProfileTime,depth_array,temparray.T,np.arange(args.paramspan[0],args.paramspan[1],1), colors='#d3d3d3',linewidths=1, alpha=1.0,zorder=3)
+	CS=plt.contour(ProfileTime,depth_array,salarray.T,[32,32.5,33,33.5,34],linewidths=0.5,colors='#00FF00',zorder=4)
+	plt.clabel(CS, inline=1, fontsize=18, fontweight='bold', fmt='%1.1f', manual=[(datetime.datetime(2016,6,9).toordinal(),30),(datetime.datetime(2016,6,8).toordinal(),50),(datetime.datetime(2016,6,9).toordinal(),40),(datetime.datetime(2016,6,9).toordinal()+0.75,35)])
 
 	ax1.invert_yaxis()
-	ax1.xaxis.set_major_locator(DayLocator(bymonthday=15))
-	ax1.xaxis.set_minor_locator(DayLocator(bymonthday=[5,10,15,20,25,30]))
-	ax1.xaxis.set_major_formatter(ticker.NullFormatter())
+	ax1.set_ylim([args.maxdepth,0])
+	ax1.yaxis.set_minor_locator(ticker.MultipleLocator(5))
+	ax1.xaxis.set_major_locator(DayLocator(bymonthday=1))
+	ax1.xaxis.set_minor_locator(DayLocator(bymonthday=range(1,31,2)))
 	ax1.xaxis.set_minor_formatter(DateFormatter('%d'))
-	ax1.xaxis.set_major_formatter(DateFormatter('%b %y'))
+	ax1.xaxis.set_major_formatter(DateFormatter('%b %Y'))
 	ax1.xaxis.set_tick_params(which='major', pad=25)
-	ax1.set_xlim([datetime.datetime(2016,06,05),datetime.datetime(2016,06,25)])
+	ax1.xaxis.set_tick_params(which='minor', pad=5)
+	ax1.set_xlim([datetime.datetime(2016,06,7),datetime.datetime(2016,06,30)])
 
 	plt.tight_layout()
 	plt.savefig(args.filepath + '.svg', transparent=False, dpi = (300))

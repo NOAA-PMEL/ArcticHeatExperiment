@@ -47,10 +47,34 @@ __status__   = "Development"
 __keywords__ = 'netCDF','meta','header', 'csv'
 
 
+### Plot settings
+mpl.rcParams['axes.grid'] = False
+mpl.rcParams['axes.edgecolor'] = 'black'
+mpl.rcParams['axes.linewidth'] = 0.5
+mpl.rcParams['grid.linestyle'] = '--'
+mpl.rcParams['grid.linestyle'] = '--'
+mpl.rcParams['xtick.major.size'] = 4
+mpl.rcParams['xtick.minor.size'] = 2
+mpl.rcParams['xtick.major.width'] = 2
+mpl.rcParams['xtick.minor.width'] = 1
+mpl.rcParams['ytick.major.size'] = 6
+mpl.rcParams['ytick.minor.size'] = 2
+mpl.rcParams['ytick.major.width'] = 2
+mpl.rcParams['ytick.minor.width'] = 1
+mpl.rcParams['ytick.direction'] = 'out'
+mpl.rcParams['xtick.direction'] = 'out'
+mpl.rcParams['ytick.color'] = 'k'
+mpl.rcParams['xtick.color'] = 'k'
+mpl.rcParams['font.size'] = 18
+mpl.rcParams['font.sans-serif'] = "Arial"
+mpl.rcParams['font.family'] = "sans-serif"
+mpl.rcParams['font.weight'] = 'medium'
+mpl.rcParams['svg.fonttype'] = 'none'
+
 def etopo1_subset(file='etopo1.nc', region=None):
     """ read in ardemV2 topography/bathymetry. """
     
-    file='/Users/bell/in_and_outbox/Ongoing_Analysis/MapGrids/etopo_subsets/etopo1_chukchi.nc'
+    file='/Volumes/WDC_internal/Users/bell/in_and_outbox/Ongoing_Analysis/MapGrids/etopo_subsets/etopo1_chukchi.nc'
     bathydata = Dataset(file)
     
     topoin = bathydata.variables['Band1'][:]
@@ -107,8 +131,9 @@ parser.add_argument("-plots","--plots", action="store_true",
 args = parser.parse_args()
 
 
+
 ###nc readin/out
-file1 = '/Users/bell/ecoraid/2016/Additional_FieldData/ArcticHeat/AlamoFloats/netcdf/arctic_heat_alamo_profiles_9076_8a66_41a1_a1fa.nc'
+file1 = '/Volumes/WDC_internal/Users/bell/ecoraid/2016/Additional_FieldData/ArcticHeat/AlamoFloats/netcdf/arctic_heat_alamo_profiles_9058_9f75_d5e5_f5f9.nc'
 df = EcoFOCI_netCDF(file1)
 global_atts = df.get_global_atts()
 vars_dic = df.get_vars()
@@ -116,7 +141,7 @@ dims = df.get_dims()
 data0 = df.ncreadfile_dic()
 df.close()
 
-file2 = '/Users/bell/ecoraid/2016/Additional_FieldData/ArcticHeat/AlamoFloats/netcdf/arctic_heat_alamo_profiles_9085_14c8_d35b_bea4.nc'
+file2 = '/Volumes/WDC_internal/Users/bell/ecoraid/2016/Additional_FieldData/ArcticHeat/AlamoFloats/netcdf/arctic_heat_alamo_profiles_9115_bb97_cc7e_a9c0.nc'
 df = EcoFOCI_netCDF(file2)
 global_atts = df.get_global_atts()
 vars_dic = df.get_vars()
@@ -273,7 +298,7 @@ if args.plots:
     if mono_col_plt:
         xd0,yd0 = m(data0['longitude'],data0['latitude'])
         #manually add another point
-        xd0,yd0 = m(np.hstack([data0['longitude'],[-156.6]]),np.hstack([data0['latitude'],[71.6]]))
+        #xd0,yd0 = m(np.hstack([data0['longitude'],[-156.6]]),np.hstack([data0['latitude'],[71.6]]))
         xd1,yd1 = m(data1['longitude'],data1['latitude'])
 
     #CS = m.imshow(topoin, cmap='Greys_r') #
@@ -302,8 +327,8 @@ if args.plots:
         c = plt.colorbar()
         c.set_label("~BTM Temperature")
     if mono_col_plt:
-        m.scatter(xd0,yd0,50,marker='.', edgecolors='none', c='#004499')
-        m.scatter(xd1,yd1,50,marker='.', edgecolors='none', c='#299387')
+        m.scatter(xd0,yd0,60,marker='.', edgecolors='none', c='#004499')
+        m.scatter(xd1,yd1,60,marker='.', edgecolors='none', c='#299387')
 
 
     m.plot(xd0[0],yd0[0], '+', markersize=10, color='k')
