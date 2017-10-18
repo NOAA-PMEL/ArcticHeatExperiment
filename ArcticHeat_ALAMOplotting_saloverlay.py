@@ -257,8 +257,7 @@ if args.contour_plot:
 	#cbar.set_label('Temperature (C)',rotation=0, labelpad=90)
 	plt.contourf(ProfileTime,depth_array,temparray.T, 
 		extend='both', cmap=cmocean.cm.thermal, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=1.0, zorder=1)
-	plt.contour(ProfileTime,depth_array,temparray.T,np.arange(args.paramspan[0],args.paramspan[1],1), colors='#d3d3d3',linewidths=1, alpha=1.0,zorder=3)
-	CS=plt.contour(ProfileTime,depth_array,salarray.T,[32,32.5,33,33.5,34],linewidths=0.5,colors='#00FF00',zorder=4)
+	CS=plt.contour(ProfileTime,depth_array,salarray.T,[32,32.5,33,33.5,34],linewidths=1.0,colors='#00FF00',zorder=4)
 	plt.clabel(CS, inline=1, fontsize=18, fontweight='bold', fmt='%1.1f', manual=[(datetime.datetime(2016,6,9).toordinal(),30),(datetime.datetime(2016,6,8).toordinal(),50),(datetime.datetime(2016,6,9).toordinal(),40),(datetime.datetime(2016,6,9).toordinal()+0.75,35)])
 
 	ax1.invert_yaxis()
@@ -273,6 +272,6 @@ if args.contour_plot:
 	ax1.set_xlim([datetime.datetime(2016,06,7),datetime.datetime(2016,06,30)])
 
 	plt.tight_layout()
-	plt.savefig(args.filepath + '.svg', transparent=False, dpi = (300))
+	#plt.savefig(args.filepath + '.svg', transparent=False, dpi = (300))
 	plt.savefig(args.filepath + '.png', transparent=False, dpi = (300))
 	plt.close()
