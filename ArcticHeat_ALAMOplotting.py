@@ -48,13 +48,13 @@ mpl.rcParams['axes.linewidth'] = 0.25
 mpl.rcParams['grid.linestyle'] = '--'
 mpl.rcParams['grid.linestyle'] = '--'
 mpl.rcParams['xtick.major.size'] = 4
-mpl.rcParams['xtick.minor.size'] = 2
+mpl.rcParams['xtick.minor.size'] = 3.75
 mpl.rcParams['xtick.major.width'] = 2
-mpl.rcParams['xtick.minor.width'] = 1
-mpl.rcParams['ytick.major.size'] = 6
-mpl.rcParams['ytick.minor.size'] = 2
+mpl.rcParams['xtick.minor.width'] = 1.75
+mpl.rcParams['ytick.major.size'] = 4
+mpl.rcParams['ytick.minor.size'] = 3.75
 mpl.rcParams['ytick.major.width'] = 2
-mpl.rcParams['ytick.minor.width'] = 1
+mpl.rcParams['ytick.minor.width'] = 1.75
 mpl.rcParams['ytick.direction'] = 'out'
 mpl.rcParams['xtick.direction'] = 'out'
 mpl.rcParams['ytick.color'] = 'k'
@@ -64,6 +64,7 @@ mpl.rcParams['font.sans-serif'] = "Arial"
 mpl.rcParams['font.family'] = "sans-serif"
 mpl.rcParams['font.weight'] = 'medium'
 mpl.rcParams['svg.fonttype'] = 'none'
+
 
 # Example of making your own norm.  Also see matplotlib.colors.
 # From Joe Kington: This one gives two different linear ramps:
@@ -223,7 +224,7 @@ if args.contour_plot:
 	ProfileTime = []
 	cycle_col=0
 
-	fig = plt.figure(1, figsize=(12, 6), facecolor='w', edgecolor='w')
+	fig = plt.figure(1, figsize=(18, 6), facecolor='w', edgecolor='w')
 	ax1 = fig.add_subplot(111)		
 	for cycle in range(startcycle,endcycle+1,1):
 		#get db meta information for mooring
@@ -260,13 +261,13 @@ if args.contour_plot:
 	ax1.invert_yaxis()
 	ax1.set_ylim([args.maxdepth,0])
 	ax1.yaxis.set_minor_locator(ticker.MultipleLocator(5))
-	ax1.xaxis.set_major_locator(DayLocator(bymonthday=1))
-	ax1.xaxis.set_minor_locator(DayLocator(bymonthday=range(0,31,5)))
-	ax1.xaxis.set_minor_formatter(DateFormatter('%d'))
-	ax1.xaxis.set_major_formatter(DateFormatter('%b %Y'))
+	ax1.xaxis.set_major_locator(DayLocator(bymonthday=range(0,31,5)))
+	ax1.xaxis.set_minor_locator(DayLocator(bymonthday=range(1,32,1)))
+	ax1.xaxis.set_minor_formatter(DateFormatter(''))
+	ax1.xaxis.set_major_formatter(DateFormatter('%d'))
 	ax1.xaxis.set_tick_params(which='major', pad=25)
 	ax1.xaxis.set_tick_params(which='minor', pad=5)
-	#ax1.set_xlim([datetime.datetime(2016,9,13),datetime.datetime(2016,12,1)])
+	#ax1.set_xlim([datetime.datetime(2016,9,16),datetime.datetime(2016,12,12)])
 
 
 	plt.tight_layout()

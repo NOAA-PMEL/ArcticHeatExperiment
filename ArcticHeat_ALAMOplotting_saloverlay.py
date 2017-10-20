@@ -48,13 +48,13 @@ mpl.rcParams['axes.linewidth'] = 0.25
 mpl.rcParams['grid.linestyle'] = '--'
 mpl.rcParams['grid.linestyle'] = '--'
 mpl.rcParams['xtick.major.size'] = 4
-mpl.rcParams['xtick.minor.size'] = 2
+mpl.rcParams['xtick.minor.size'] = 3.75
 mpl.rcParams['xtick.major.width'] = 2
-mpl.rcParams['xtick.minor.width'] = 1
-mpl.rcParams['ytick.major.size'] = 6
-mpl.rcParams['ytick.minor.size'] = 2
+mpl.rcParams['xtick.minor.width'] = 1.75
+mpl.rcParams['ytick.major.size'] = 4
+mpl.rcParams['ytick.minor.size'] = 3.75
 mpl.rcParams['ytick.major.width'] = 2
-mpl.rcParams['ytick.minor.width'] = 1
+mpl.rcParams['ytick.minor.width'] = 1.75
 mpl.rcParams['ytick.direction'] = 'out'
 mpl.rcParams['xtick.direction'] = 'out'
 mpl.rcParams['ytick.color'] = 'k'
@@ -256,20 +256,20 @@ if args.contour_plot:
 	#cbar = plt.colorbar()
 	#cbar.set_label('Temperature (C)',rotation=0, labelpad=90)
 	plt.contourf(ProfileTime,depth_array,temparray.T, 
-		extend='both', cmap=cmocean.cm.thermal, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=1.0, zorder=1)
+		extend='both', cmap=cmocean.cm.thermal, levels=np.arange(args.paramspan[0],args.paramspan[1],0.25), alpha=.95, zorder=1)
 	CS=plt.contour(ProfileTime,depth_array,salarray.T,[32,32.5,33,33.5,34],linewidths=1.0,colors='#00FF00',zorder=4)
 	plt.clabel(CS, inline=1, fontsize=18, fontweight='bold', fmt='%1.1f', manual=[(datetime.datetime(2016,6,9).toordinal(),30),(datetime.datetime(2016,6,8).toordinal(),50),(datetime.datetime(2016,6,9).toordinal(),40),(datetime.datetime(2016,6,9).toordinal()+0.75,35)])
 
 	ax1.invert_yaxis()
 	ax1.set_ylim([args.maxdepth,0])
 	ax1.yaxis.set_minor_locator(ticker.MultipleLocator(5))
-	ax1.xaxis.set_major_locator(DayLocator(bymonthday=1))
-	ax1.xaxis.set_minor_locator(DayLocator(bymonthday=range(1,31,2)))
-	ax1.xaxis.set_minor_formatter(DateFormatter('%d'))
-	ax1.xaxis.set_major_formatter(DateFormatter('%b %Y'))
+	ax1.xaxis.set_major_locator(DayLocator(bymonthday=range(1,31,2)))
+	ax1.xaxis.set_minor_locator(DayLocator(bymonthday=range(1,31,1)))
+	ax1.xaxis.set_minor_formatter(DateFormatter(''))
+	ax1.xaxis.set_major_formatter(DateFormatter('%d'))
 	ax1.xaxis.set_tick_params(which='major', pad=25)
 	ax1.xaxis.set_tick_params(which='minor', pad=5)
-	ax1.set_xlim([datetime.datetime(2016,06,7),datetime.datetime(2016,06,30)])
+	ax1.set_xlim([datetime.datetime(2016,06,7),datetime.datetime(2016,06,21)])
 
 	plt.tight_layout()
 	#plt.savefig(args.filepath + '.svg', transparent=False, dpi = (300))
