@@ -26,6 +26,7 @@ def cmocean_to_leaflet(cmap, pl_entries):
     return pl_colorscale
 
 thermal = cmocean_to_leaflet(cmocean.cm.thermal, 1000)
+thermal[-1] = [-1.0, '#FFFFFF'] ### relace highest color value with white (so all data at extreme + end is white)
 
 def rgb2hex(r,g,b):
     hex = "#{:02x}{:02x}{:02x}".format(r,g,b)
@@ -305,7 +306,7 @@ tol = .00001
 # In[221]:
 browser = webdriver.Chrome()
 
-for doymax in range(255,365,1):
+for doymax in range(364,365,1):
     for hourmax in range(0,24,12):
         f = folium.map.FeatureGroup()
         
@@ -402,7 +403,7 @@ for doymax in range(255,365,1):
         df3gbc_t = df3gbc.set_index('time (UTC)')
         df3gbc_t = df3gbc_t[df3gbc_t['doyfrac'] <= (doymax + hourmax/24.0)]
         df3gbc_t = df3gbc_t.resample('12H').mean()
-        df3gbc_t['TEMP (degree_Celsius)'].replace(np.nan,1000,inplace=True)
+        df3gbc_t['TEMP (degree_Celsius)'].replace(np.nan,10000,inplace=True)
         df3gbc_t=df3gbc_t.interpolate()
 
         f3 = folium.map.FeatureGroup()
@@ -547,11 +548,11 @@ for doymax in range(255,365,1):
         m.add_child(f1)
         m.add_child(f1s)
         m.add_child(f1a)
-        m.add_child(f2)
-        m.add_child(f2s)
+#        m.add_child(f2)
+#        m.add_child(f2s)
         m.add_child(f2a)
-        m.add_child(f3)
-        m.add_child(f3s)
+#        m.add_child(f3)
+#        m.add_child(f3s)
         m.add_child(f3a)
         m.add_child(f4a)
         m.add_child(f5a)
