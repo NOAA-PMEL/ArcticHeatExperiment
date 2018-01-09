@@ -26,7 +26,7 @@ def cmocean_to_leaflet(cmap, pl_entries):
     return pl_colorscale
 
 thermal = cmocean_to_leaflet(cmocean.cm.thermal, 1000)
-thermal[-1] = [-1.0, '#FFFFFF'] ### relace highest color value with white (so all data at extreme + end is white)
+thermal[-1] = [1.0, '#FFFFFF'] ### replace highest color value with white (so all data at extreme + end is white)
 
 def rgb2hex(r,g,b):
     hex = "#{:02x}{:02x}{:02x}".format(r,g,b)
@@ -306,7 +306,7 @@ tol = .00001
 # In[221]:
 browser = webdriver.Chrome()
 
-for doymax in range(364,365,1):
+for doymax in range(255,365,1):
     for hourmax in range(0,24,12):
         f = folium.map.FeatureGroup()
         
@@ -547,15 +547,15 @@ for doymax in range(364,365,1):
                       png_enabled=True)
         m.add_child(f1)
         m.add_child(f1s)
-        m.add_child(f1a)
-#        m.add_child(f2)
-#        m.add_child(f2s)
-        m.add_child(f2a)
-#        m.add_child(f3)
-#        m.add_child(f3s)
-        m.add_child(f3a)
-        m.add_child(f4a)
-        m.add_child(f5a)
+#        m.add_child(f1a)
+        m.add_child(f2)
+        m.add_child(f2s)
+#        m.add_child(f2a)
+        m.add_child(f3)
+        m.add_child(f3s)
+#        m.add_child(f3a)
+#        m.add_child(f4a)
+#        m.add_child(f5a)
         
         # In[220]:
         
