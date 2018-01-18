@@ -267,7 +267,7 @@ if args.contour_plot:
 	ax1.xaxis.set_major_formatter(DateFormatter('%d'))
 	ax1.xaxis.set_tick_params(which='major', pad=25)
 	ax1.xaxis.set_tick_params(which='minor', pad=5)
-	#ax1.set_xlim([datetime.datetime(2016,9,16),datetime.datetime(2016,12,12)])
+	ax1.set_xlim([datetime.datetime(2017,9,16),datetime.datetime(2017,12,12)])
 
 
 	plt.tight_layout()
