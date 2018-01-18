@@ -25,6 +25,7 @@ def cmocean_to_leaflet(cmap, pl_entries):
     return pl_colorscale
 
 thermal = cmocean_to_leaflet(cmocean.cm.thermal, 1000)
+thermal[-1] = [1.0, '#767474'] ### replace highest color value with white (so all data at extreme + end is white)
 
 def rgb2hex(r,g,b):
     hex = "#{:02x}{:02x}{:02x}".format(r,g,b)
@@ -161,11 +162,14 @@ tol = .00001
 # In[221]:
 browser = webdriver.Chrome()
 
-for doymax in range(255,270,1):
+for doymax in range(255,365,1):
     for hourmax in range(0,24,12):
         f = folium.map.FeatureGroup()
         
         dfgbc_t = dfgbc.set_index('time (UTC)')
+        dfgbc_t['doy'] = [x.to_pydatetime().timetuple().tm_yday for x in dfgbc_t.index]
+        dfgbc_t['fracday'] = [((x.to_pydatetime().timetuple().tm_hour*60.) + x.to_pydatetime().timetuple().tm_min)/1440. for x in dfgbc_t.index]
+        dfgbc_t['doyfrac'] = dfgbc_t['doy'] + dfgbc_t['fracday']
         dfgbc_t = dfgbc_t[dfgbc_t['doyfrac'] <= (doymax + hourmax/24.0)]
         dfgbc_t = dfgbc_t.resample('12H').mean()
         dfgbc_t['TEMP (degree_Celsius)'].replace(np.nan,1000,inplace=True)
@@ -179,7 +183,7 @@ for doymax in range(255,270,1):
             lngs = dfgbc_t['longitude (degrees_east)'].values
             colors = dfgbc_t['TEMP (degree_Celsius)'].values
             for lat, lng, color in zip(lats, lngs, colors):
-                nval = find_nearest(np.array([x[0] for x in thermal]),color_normalize(-2.,10.,color))
+                nval = find_nearest(np.array([x[0] for x in thermal]),color_normalize(-2.,7.,color))
                 f1.add_child(
                     folium.features.CircleMarker(
                         [lat, lng],
@@ -213,6 +217,9 @@ for doymax in range(255,270,1):
         f2 = folium.map.FeatureGroup()
         
         df2gbc_t = df2gbc.set_index('time (UTC)')
+        df2gbc_t['doy'] = [x.to_pydatetime().timetuple().tm_yday for x in df2gbc_t.index]
+        df2gbc_t['fracday'] = [((x.to_pydatetime().timetuple().tm_hour*60.) + x.to_pydatetime().timetuple().tm_min)/1440. for x in df2gbc_t.index]
+        df2gbc_t['doyfrac'] = df2gbc_t['doy'] + df2gbc_t['fracday']
         df2gbc_t = df2gbc_t[df2gbc_t['doyfrac'] <= (doymax + hourmax/24.0)]
         df2gbc_t = df2gbc_t.resample('12H').mean()
         df2gbc_t['TEMP (degree_Celsius)'].replace(np.nan,1000,inplace=True)
@@ -226,7 +233,7 @@ for doymax in range(255,270,1):
             lngs = df2gbc_t['longitude (degrees_east)'].values
             colors = df2gbc_t['TEMP (degree_Celsius)'].values
             for lat, lng, color in zip(lats, lngs, colors):
-                nval = find_nearest(np.array([x[0] for x in thermal]),color_normalize(-2.,10.,color))
+                nval = find_nearest(np.array([x[0] for x in thermal]),color_normalize(-2.,7.,color))
                 f2.add_child(
                     folium.features.CircleMarker(
                         [lat, lng],
@@ -256,6 +263,9 @@ for doymax in range(255,270,1):
         # In[219]:
         
         df3gbc_t = df3gbc.set_index('time (UTC)')
+        df3gbc_t['doy'] = [x.to_pydatetime().timetuple().tm_yday for x in df3gbc_t.index]
+        df3gbc_t['fracday'] = [((x.to_pydatetime().timetuple().tm_hour*60.) + x.to_pydatetime().timetuple().tm_min)/1440. for x in df3gbc_t.index]
+        df3gbc_t['doyfrac'] = df3gbc_t['doy'] + df3gbc_t['fracday']
         df3gbc_t = df3gbc_t[df3gbc_t['doyfrac'] <= (doymax + hourmax/24.0)]
         df3gbc_t = df3gbc_t.resample('12H').mean()
         df3gbc_t['TEMP (degree_Celsius)'].replace(np.nan,1000,inplace=True)
@@ -269,7 +279,7 @@ for doymax in range(255,270,1):
             lngs = df3gbc_t['longitude (degrees_east)'].values
             colors = df3gbc_t['TEMP (degree_Celsius)'].values
             for lat, lng, color in zip(lats, lngs, colors):
-                nval = find_nearest(np.array([x[0] for x in thermal]),color_normalize(-2.,10.,color))
+                nval = find_nearest(np.array([x[0] for x in thermal]),color_normalize(-2.,7.,color))
                 f3.add_child(
                     folium.features.CircleMarker(
                         [lat, lng],
