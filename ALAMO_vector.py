@@ -191,7 +191,7 @@ g1.ylabels_left = True
 g1.xlabels_top = True
 
 
-## dive location plot
+#%% dive location plot
 fig = plt.figure()
 plt.subplot(1,1,1)
 ax = plt.axes(projection=ccrs.PlateCarree())
@@ -218,6 +218,23 @@ ax.add_feature(land_50m)
 ax.coastlines(resolution='50m')
 ax.set_extent(extent)
 
+gv = plt.plot(traj['LONGITUDE'].iloc[1::2], traj['LATITUDE'].iloc[::2],
+         linestyle=None, linewidth=0, color='black', marker='+', markersize=.5,
+         transform=ccrs.PlateCarree(),
+         )
+for i in range(1,1203,10): #surface vectors
+    gt = plt.text(traj['LONGITUDE'].iloc[i], traj['LATITUDE'].iloc[i], traj['DIVE_NUMBER'].iloc[i].astype(str),
+         horizontalalignment='right', fontsize=6,
+         transform=ccrs.PlateCarree())
+    
+g1 = ax.gridlines(crs=ccrs.PlateCarree(),
+              linewidth=.25, color='gray', alpha=0.5, linestyle='--')
+g1.xlocator = ticker.FixedLocator([-156, -160, -164, -168, -172, -176, 180])
+g1.ylocator = ticker.FixedLocator([64, 66, 68, 70, 72, 74, 76])
+g1.xformatter = LONGITUDE_FORMATTER
+g1.yformatter = LATITUDE_FORMATTER
+g1.ylabels_left = True
+g1.xlabels_top = True
 #%%
 print "plotting data in polar coordinates with 25 cm/s concentric circles"
 
